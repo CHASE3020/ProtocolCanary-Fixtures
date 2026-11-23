@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-stellar-value-upgrade-too-long",
+  "fixtureSha256": "29c4b7d0b970a412ec09e013c8da7fc137aefa83851c3820c33bb58e769d7ad8",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:16:54Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

@@ -104,8 +104,8 @@ instead of being silently accepted:
 - ``PreconditionType``: ``PRECOND_NONE`` and ``PRECOND_TIME``.
 - ``SCVal`` vectors (contract call arguments), ``LedgerKey`` footprint vectors
   and ``SorobanAuthorizationEntry`` vectors: empty vectors only.
-- ``LedgerEntry``: the ``ACCOUNT``, ``TRUSTLINE``, ``CONTRACT_DATA``,
-  ``CONTRACT_CODE`` and ``TTL`` arms, with ext arm V0 only, and the embedded
+- ``LedgerEntry``: the ``ACCOUNT``, ``TRUSTLINE``, ``OFFER``, ``DATA``,
+  ``CONTRACT_DATA``, ``CONTRACT_CODE`` and ``TTL`` arms, with ext arm V0 only, and the embedded
   ``SCVal`` key/value restricted to ``SCV_U32`` and ``SCV_SYMBOL`` (the arms
   the pack's contract-data fixtures use; the full ScVal codec is
   ``tests/scval_xdr.py``).
@@ -344,6 +344,8 @@ class Asset:
 # LedgerEntryType, Stellar-ledger-entries.x at v28.0 (lines 92-104).
 LEDGER_ENTRY_TYPE_ACCOUNT = 0
 LEDGER_ENTRY_TYPE_TRUSTLINE = 1
+LEDGER_ENTRY_TYPE_OFFER = 2
+LEDGER_ENTRY_TYPE_DATA = 3
 LEDGER_ENTRY_TYPE_CONTRACT_DATA = 6
 LEDGER_ENTRY_TYPE_CONTRACT_CODE = 7
 LEDGER_ENTRY_TYPE_TTL = 9
@@ -400,6 +402,30 @@ class TrustLineEntry:
 
 
 @dataclass(frozen=True)
+class Price:
+    n: int  # int32 numerator
+    d: int  # int32 denominator
+
+
+@dataclass(frozen=True)
+class OfferEntry:
+    seller_id: PublicKey
+    offer_id: int  # int64
+    selling: Asset
+    buying: Asset
+    amount: int  # int64
+    price: Price
+    flags: int  # uint32
+
+
+@dataclass(frozen=True)
+class DataEntry:
+    account_id: PublicKey
+    data_name: bytes  # string64, kept as raw bytes
+    data_value: bytes  # DataValue = opaque<64>
+
+
+@dataclass(frozen=True)
 class ContractDataEntry:
     contract: SCAddress
     key: tuple[str, Any]
@@ -425,6 +451,8 @@ class LedgerEntry:
     entry_type: int  # LedgerEntryType
     account: AccountEntry | None = None
     trustline: TrustLineEntry | None = None
+    offer: OfferEntry | None = None
+    data: DataEntry | None = None
     contract_data: ContractDataEntry | None = None
     contract_code: ContractCodeEntry | None = None
     ttl: TTLEntry | None = None
@@ -1428,7 +1456,7 @@ def decode_stellar_value(raw: bytes) -> StellarValue:
 
     upgrade_count = reader.read_uint32()
     if upgrade_count > 6:
-        raise XdrCodecError(f"upgrades count {upgrade_count} exceeds maximum 6")
+        raise XdrCodecError(f"upgrades vector length {upgrade_count} exceeds maximum 6")
     upgrades: list[bytes] = []
     for _ in range(upgrade_count):
         upgrades.append(reader.read_var_opaque(max_length=128))
@@ -1493,7 +1521,7 @@ def encode_stellar_value(val: StellarValue) -> bytes:
     writer.write_uint64(val.close_time)
 
     if len(val.upgrades) > 6:
-        raise XdrCodecError(f"upgrades count {len(val.upgrades)} exceeds maximum 6")
+        raise XdrCodecError(f"upgrades vector length {len(val.upgrades)} exceeds maximum 6")
     writer.write_uint32(len(val.upgrades))
     for u in val.upgrades:
         writer.write_var_opaque(u, max_length=128)
@@ -1647,7 +1675,9 @@ def encode_transaction_envelope(val: TransactionEnvelope) -> bytes:
 #
 # F-090 (issue #363). Transcribed from Stellar-ledger-entries.x at v28.0:
 # LedgerEntry (lines 548-586), LedgerEntryType (92-104), AccountEntry
-# (190-217), TrustLineEntry (276-307), TrustLineAsset (247-262), Signer
+# (190-217), TrustLineEntry (276-307), TrustLineAsset (247-262), Price
+# (70-74), OfferEntry (326-349), DataEntry (354-366), string64 (14), DataValue
+# (16), Signer
 # (106-110), ContractDataEntry (490-497), ContractDataDurability (485-488),
 # ContractCodeEntry (513-528) and TTLEntry (530-534). Extension arms other
 # than V0 are rejected rather than guessed; the pack's fixtures use V0 only.
@@ -1849,6 +1879,60 @@ def _encode_ttl_entry(writer: XdrWriter, entry: TTLEntry) -> None:
     writer.write_uint32(entry.live_until_ledger_seq)
 
 
+# string64 and DataValue (Stellar-ledger-entries.x lines 14 and 16) are both
+# bounded at 64 bytes; a longer length prefix is rejected before the payload is
+# read, as the official crate does.
+DATA_NAME_LIMIT = 64
+DATA_VALUE_LIMIT = 64
+
+
+def _decode_v0_ext(reader: XdrReader, label: str) -> None:
+    ext = reader.read_int32()
+    if ext != 0:
+        raise XdrCodecError(f"unsupported {label} ext discriminant: {ext}")
+
+
+def _decode_offer_entry(reader: XdrReader) -> OfferEntry:
+    entry = OfferEntry(
+        seller_id=_decode_public_key(reader),
+        offer_id=reader.read_int64(),
+        selling=_decode_asset(reader),
+        buying=_decode_asset(reader),
+        amount=reader.read_int64(),
+        price=Price(n=reader.read_int32(), d=reader.read_int32()),
+        flags=reader.read_uint32(),
+    )
+    _decode_v0_ext(reader, "OfferEntry")
+    return entry
+
+
+def _encode_offer_entry(writer: XdrWriter, entry: OfferEntry) -> None:
+    _encode_public_key(writer, entry.seller_id)
+    writer.write_int64(entry.offer_id)
+    _encode_asset(writer, entry.selling)
+    _encode_asset(writer, entry.buying)
+    writer.write_int64(entry.amount)
+    writer.write_int32(entry.price.n)
+    writer.write_int32(entry.price.d)
+    writer.write_uint32(entry.flags)
+    writer.write_int32(0)  # OfferEntry ext V0
+
+
+def _decode_data_entry(reader: XdrReader) -> DataEntry:
+    account_id = _decode_public_key(reader)
+    data_name = reader.read_var_opaque(DATA_NAME_LIMIT)
+    data_value = reader.read_var_opaque(DATA_VALUE_LIMIT)
+    _decode_v0_ext(reader, "DataEntry")
+    return DataEntry(account_id=account_id, data_name=data_name, data_value=data_value)
+
+
+def _encode_data_entry(writer: XdrWriter, entry: DataEntry) -> None:
+    _encode_public_key(writer, entry.account_id)
+    writer.write_var_opaque(entry.data_name, max_length=DATA_NAME_LIMIT)
+    writer.write_var_opaque(entry.data_value, max_length=DATA_VALUE_LIMIT)
+    writer.write_int32(0)  # DataEntry ext V0
+
+
 def decode_ledger_entry(raw: bytes) -> LedgerEntry:
     reader = XdrReader(raw)
     last_modified = reader.read_uint32()
@@ -1865,6 +1949,18 @@ def decode_ledger_entry(raw: bytes) -> LedgerEntry:
             last_modified_ledger_seq=last_modified,
             entry_type=entry_type,
             trustline=_decode_trustline_entry(reader),
+        )
+    elif entry_type == LEDGER_ENTRY_TYPE_OFFER:
+        entry = LedgerEntry(
+            last_modified_ledger_seq=last_modified,
+            entry_type=entry_type,
+            offer=_decode_offer_entry(reader),
+        )
+    elif entry_type == LEDGER_ENTRY_TYPE_DATA:
+        entry = LedgerEntry(
+            last_modified_ledger_seq=last_modified,
+            entry_type=entry_type,
+            data=_decode_data_entry(reader),
         )
     elif entry_type == LEDGER_ENTRY_TYPE_CONTRACT_DATA:
         entry = LedgerEntry(
@@ -1905,6 +2001,14 @@ def encode_ledger_entry(value: LedgerEntry) -> bytes:
         if value.trustline is None:
             raise XdrCodecError("trustline entry required for TRUSTLINE")
         _encode_trustline_entry(writer, value.trustline)
+    elif value.entry_type == LEDGER_ENTRY_TYPE_OFFER:
+        if value.offer is None:
+            raise XdrCodecError("offer entry required for OFFER")
+        _encode_offer_entry(writer, value.offer)
+    elif value.entry_type == LEDGER_ENTRY_TYPE_DATA:
+        if value.data is None:
+            raise XdrCodecError("data entry required for DATA")
+        _encode_data_entry(writer, value.data)
     elif value.entry_type == LEDGER_ENTRY_TYPE_CONTRACT_DATA:
         if value.contract_data is None:
             raise XdrCodecError("contract data entry required for CONTRACT_DATA")

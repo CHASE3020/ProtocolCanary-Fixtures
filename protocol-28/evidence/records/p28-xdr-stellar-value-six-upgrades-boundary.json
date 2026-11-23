@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-stellar-value-six-upgrades-boundary",
+  "fixtureSha256": "c6ab858342fb95af496de938b7a044be4fa70eecc43765c480366454ed69f544",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:16:54Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

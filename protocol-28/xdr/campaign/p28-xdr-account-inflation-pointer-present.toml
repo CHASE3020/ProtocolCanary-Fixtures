@@ -1,0 +1,47 @@
+# Protocol 28 / LedgerEntry: an ACCOUNT entry with a present inflationDest.
+#
+# What this tests: p28-xdr-ledger-entry-account has an absent inflationDest
+# (`AccountID* inflationDest`, presence word 0). This fixture changes only
+# that field: the presence word is 1 and it is followed by an AccountID
+# (PublicKey, PUBLIC_KEY_TYPE_ED25519, 32 bytes of 0x99). Every later field
+# (flags, homeDomain, thresholds, signers, ext) is shifted by 36 bytes.
+#
+# Definitions (stellar/stellar-xdr tag v28.0, commit
+# 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694): `struct AccountEntry` in
+# Stellar-ledger-entries.x lines 190-217 (`AccountID* inflationDest`);
+# `typedef PublicKey AccountID` in Stellar-types.x line 85.
+#
+# Why it matters: a decoder that treats the optional pointer as always
+# absent, or that reads the PublicKey without its key-type discriminant,
+# would misread every field after it.
+#
+# Expected result: kind = "roundtrip"; decoding and re-encoding must
+# reproduce value_base64 exactly, and AccountEntry.inflationDest must decode
+# as a present ed25519 PublicKey. Built with the official crate, never
+# hand-assembled (the baseline expression with only inflation_dest changed):
+#
+#   LedgerEntry { last_modified_ledger_seq: 1_234_567, data: LedgerEntryData::Account(AccountEntry { account_id: AccountId(PublicKey::PublicKeyTypeEd25519(Uint256([0x11; 32]))), balance: 100_000_000, seq_num: SequenceNumber(42), num_sub_entries: 0, inflation_dest: Some(AccountId(PublicKey::PublicKeyTypeEd25519(Uint256([0x99; 32])))), flags: 0, home_domain: String32::try_from(b"example.test".to_vec()).unwrap(), thresholds: Thresholds([1, 0, 0, 0]), signers: VecM::try_from(Vec::<Signer>::new()).unwrap(), ext: AccountEntryExt::V0 }), ext: LedgerEntryExt::V0 }.to_xdr_base64(Limits::none())
+#
+# Crate: official `stellar-xdr` 28.0.1 (features base64, alloc, std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28);
+# rustc 1.97.1 (8bab26f4f 2026-07-14); generated 2026-11-20 (UTC). The same crate decoded
+# the bytes and re-encoded them identically. Deterministic.
+#
+# Synthetic structural values: the 0x11 and 0x99 keys are placeholders, no
+# secret key is represented, and the balance and sequence numbers are
+# arbitrary. This does not demonstrate network acceptance, signature
+# validity, deployed contract state or host behavior. Nothing here was
+# observed on a network.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger-entries.x
+
+id = "p28-xdr-account-inflation-pointer-present"
+protocol = 28
+surface = "xdr"
+category = "ledger-entry"
+description = "An `ACCOUNT` `LedgerEntry` with a present inflationDest pointer round-trips byte-for-byte"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger-entries.x"
+
+type = "LedgerEntry"
+kind = "roundtrip"
+value_base64 = "ABLWhwAAAAAAAAAAEREREREREREREREREREREREREREREREREREREREREREAAAAABfXhAAAAAAAAAAAqAAAAAAAAAAEAAAAAmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZmZkAAAAAAAAADGV4YW1wbGUudGVzdAEAAAAAAAAAAAAAAAAAAAA="

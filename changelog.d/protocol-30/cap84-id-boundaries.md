@@ -1,0 +1,1 @@
+- Add Protocol 30 CAP-84 muxed-contract address fixtures for the uint64 id endpoints zero and `2^64 - 1`.

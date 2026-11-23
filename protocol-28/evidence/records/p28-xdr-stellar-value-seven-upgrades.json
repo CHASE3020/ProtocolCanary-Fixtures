@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-stellar-value-seven-upgrades",
+  "fixtureSha256": "611a80e346873315ce3773d252dab233f702902b2d6fc673337798cfedb7250a",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:16:54Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

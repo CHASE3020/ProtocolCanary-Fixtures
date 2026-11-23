@@ -1,0 +1,48 @@
+# Protocol 28 / ScVal: an `SCV_MAP` whose optional-pointer flag is 2 is rejected.
+#
+# What this tests:
+# `case SCV_MAP: SCMap *map;` is an XDR optional, encoded as a 4-byte
+# present flag (0 = absent, 1 = present) before the sequence. This value
+# carries flag 2.
+#
+# Why it matters: the official crate decodes the flag through its generated
+# `Option<T>` reader, which accepts only 0 and 1. A decoder that treats any
+# nonzero flag as present accepts bytes the protocol cannot produce.
+#
+# Definitions (stellar/stellar-xdr at tag v28.0, commit 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694):
+#
+#   * `case SCV_MAP: SCMap *map;` — Stellar-contract.x lines 297-300;
+#   * `enum SCValType` — Stellar-contract.x lines 26-81;
+#   * `union SCVal` — Stellar-contract.x lines 254-316.
+#
+# Malformation rule (documented, deterministic):
+# the crate-produced 32-byte encoding with exactly one field changed:
+# the 4-byte present flag at offset 4 is set from 1 to 2. The discriminant
+# and the entry count (1) and the entry `k => U32(1)` are unchanged.
+#
+# Generated and checked with the official `stellar-xdr 28.0.1` crate (features base64, alloc and std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28; rustc 1.97.1
+# (8bab26f4f 2026-07-14)) on 2026-11-20 (UTC):
+# the source value (`ScVal::Map(Some(ScMap(vec![ScMapEntry { key: ScVal::Symbol(ScSymbol::try_from(b"k".to_vec()).unwrap()), val: ScVal::U32(1) }].try_into().unwrap())))`, 32 bytes) was built and round-tripped with the
+# crate, the mutation above was applied as the only change, and
+# from_xdr returns Err ("xdr value invalid") for the result.
+# The rejection is the flag value itself; the sequence behind it is well formed.
+#
+# Is it deterministic: Yes. A fixed value and a fixed byte mutation.
+#
+# Every byte is a synthetic structural value, not a capture of a real network
+# object: no real account key, contract id, signature or secret key appears,
+# and nothing here was observed on a network or accepted by a host.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x
+
+id = "p28-xdr-scval-map-invalid-pointer-flag"
+protocol = 28
+surface = "xdr"
+category = "scval-composite"
+description = "A `ScVal::Map` whose pointer present flag is 2 is correctly rejected, not silently accepted"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x"
+
+type = "ScVal"
+kind = "decode-failure"
+value_base64 = "AAAAEQAAAAIAAAABAAAADwAAAAFrAAAAAAAAAwAAAAE="

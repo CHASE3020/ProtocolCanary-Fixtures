@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-scval-symbol-three-payload",
+  "fixtureSha256": "5de89611c7b5060c076c89ca76a3c598f3a97269f53683248a37196e4b3a836b",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:12:41Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

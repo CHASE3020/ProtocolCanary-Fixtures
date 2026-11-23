@@ -1,0 +1,1 @@
+- Add Protocol 28 StellarValue `upgrades` fixtures: one non-empty item, the six-item and 128-byte maximums, and rejections one above each XDR bound.

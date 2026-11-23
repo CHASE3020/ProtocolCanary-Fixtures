@@ -1,0 +1,1 @@
+- Add Protocol 28 pack fixtures that exercise a single XDR pad byte: three-byte `ScVal` bytes, string and symbol values and a three-byte CAP-0085 external-reference tag, each generated with `stellar-xdr` 28.0.1 and paired with a malformed fixture whose only change is that pad byte set to nonzero (RFC 4506 requires zero padding).

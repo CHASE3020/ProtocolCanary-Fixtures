@@ -1,0 +1,51 @@
+# Protocol 28 / ScVal: a `SCV_STRING` value whose single pad byte is nonzero is rejected.
+#
+# What this tests:
+# Complements p28-xdr-scval-string-three-payload.toml. The bytes are identical
+# except for the one alignment byte after the payload, which is 0x01.
+#
+# Why it matters:
+# RFC 4506 (sections 4.10 and 4.11) requires the residual bytes that align
+# variable-length data to a 4-byte boundary to be zero. A decoder that ignores
+# the pad byte would map two different byte strings to one value, so byte-
+# identity round trips would stop meaning anything.
+#
+# Definitions (stellar/stellar-xdr at tag v28.0, commit 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694):
+#
+#   * `typedef string SCString<>;` — Stellar-contract.x line 10;
+#   * `enum SCValType` — Stellar-contract.x lines 26-81;
+#   * `union SCVal` — Stellar-contract.x lines 254-316.
+#
+# Malformation rule (documented, deterministic):
+# the crate-produced 12-byte encoding with exactly one byte changed: the
+# single pad byte at offset 11 (the last byte) is set from 0x00 to 0x01.
+# The discriminant (14), the length prefix (3) and the three payload
+# bytes are unchanged. No invalid UTF-8 is introduced.
+#
+# Generated and checked with the official `stellar-xdr 28.0.1` crate (features base64, alloc and std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28; rustc 1.97.1
+# (8bab26f4f 2026-07-14)) on 2026-11-20 (UTC):
+# the source value (`ScVal::String(ScString::try_from(b"xdr".to_vec()).unwrap())`, the encoding in p28-xdr-scval-string-three-payload.toml) was built and round-tripped with the
+# crate, the mutation above was applied as the only change, and
+# from_xdr returns Err ("xdr padding contains non-zero bytes") for the result.
+# The rejection is the nonzero pad byte alone, not a length or truncation
+# problem: the value is complete and correctly sized.
+#
+# Is it deterministic: Yes. A fixed value and a fixed byte mutation.
+#
+# Every byte is a synthetic structural value, not a capture of a real network
+# object: no real account key, contract id, signature or secret key appears,
+# and nothing here was observed on a network or accepted by a host.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x
+
+id = "p28-xdr-scval-string-nonzero-padding"
+protocol = 28
+surface = "xdr"
+category = "scval"
+description = "A `ScVal::String` whose single pad byte is nonzero is correctly rejected, not silently accepted"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x"
+
+type = "ScVal"
+kind = "decode-failure"
+value_base64 = "AAAADgAAAAN4ZHIB"

@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-stellar-value-one-upgrade-roundtrip",
+  "fixtureSha256": "69d7068c17188ed0805f7e4f5c64442022c9164f168240b804010f4420442fd4",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:16:54Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

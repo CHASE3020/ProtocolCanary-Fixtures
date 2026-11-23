@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-scval-bytes-nonzero-padding",
+  "fixtureSha256": "99558a8b4a566eebd0c7015a3a4a9bcbc6fdc7495819689451c80255e0ecdbd1",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:12:41Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

@@ -1,0 +1,50 @@
+# Protocol 28 / StellarValue: `upgrades` at its six-item XDR bound.
+#
+# What this tests: the largest accepted upgrade count. Item i (0-based) is
+# i+1 bytes of value 0xb1+i, so the six items have lengths 1..6 and exercise
+# every padding remainder (3, 2, 1, 0, 3, 2 pad bytes).
+#
+# Why it matters: a decoder with an off-by-one bound check would reject this
+# valid value; p28-xdr-stellar-value-seven-upgrades is the rejection case one
+# above the bound.
+#
+# Definitions (stellar/stellar-xdr tag v28.0, commit
+# 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694): `struct StellarValue` in
+# Stellar-ledger.x declares `UpgradeType upgrades<6>`, and Stellar-types.x
+# declares `typedef opaque UpgradeType<128>`. So the vector holds at most six
+# items and each item holds at most 128 opaque bytes.
+#
+# Structural XDR test only: the opaque upgrade bytes are arbitrary sentinels.
+# They do not encode a real LedgerUpgrade and do not describe a
+# protocol-valid ledger upgrade.
+#
+# Definitions: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger.x
+#              https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-types.x
+#
+# Expected result: kind = "roundtrip". Built with the official crate:
+#
+#   StellarValue {
+#       tx_set_hash: Hash([0x11; 32]),
+#       close_time: TimePoint(1760000000),
+#       upgrades: (0..6u8).map(|i| UpgradeType(vec![0xb1 + i; i as usize + 1].try_into().unwrap())).collect::<Vec<_>>().try_into().unwrap(),
+#       ext: StellarValueExt::Basic,
+#   }.to_xdr_base64(Limits::none())
+#
+# Crate: official `stellar-xdr` 28.0.1 (features base64, alloc, std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28);
+# rustc 1.97.1 (8bab26f4f 2026-07-14); generated 2026-11-20 (UTC). The same crate decoded
+# the bytes and re-encoded them identically. Deterministic.
+#
+# Every byte is a synthetic structural value, not a capture of a real
+# network object. Nothing here was observed on a network.
+
+id = "p28-xdr-stellar-value-six-upgrades-boundary"
+protocol = 28
+surface = "xdr"
+category = "stellar-value"
+description = "A StellarValue with the maximum six upgrade items round-trips byte-for-byte"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger.x"
+
+type = "StellarValue"
+kind = "roundtrip"
+value_base64 = "EREREREREREREREREREREREREREREREREREREREREREAAAAAaOd4AAAAAAYAAAABsQAAAAAAAAKysgAAAAAAA7OzswAAAAAEtLS0tAAAAAW1tbW1tQAAAAAAAAa2tra2trYAAAAAAAA="

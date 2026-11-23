@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-ledger-entry-data-name-too-long",
+  "fixtureSha256": "63272930af49e5cd981ceb155ad0c18a10fd38d130a097d9ade84a9ffea7cc11",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:12:41Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

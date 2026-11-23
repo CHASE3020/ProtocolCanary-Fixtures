@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-scval-map-invalid-pointer-flag",
+  "fixtureSha256": "6dea61266cd531bad445f2dca62b65c1ad9cce395d99badabf8b9167041b25ba",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:12:41Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

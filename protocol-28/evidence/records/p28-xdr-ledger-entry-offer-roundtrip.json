@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-ledger-entry-offer-roundtrip",
+  "fixtureSha256": "21fd0aa78d8199b99fef06e7fb895ac3458358b89734fa6b0731c5ccce3b67fe",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:12:41Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

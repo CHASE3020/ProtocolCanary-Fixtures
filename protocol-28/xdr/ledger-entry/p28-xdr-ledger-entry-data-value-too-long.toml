@@ -1,0 +1,51 @@
+# Protocol 28 / LedgerEntry: a DATA entry whose dataValue is 65 bytes is rejected.
+#
+# What this tests:
+# `dataValue` is a DataValue (opaque<64>), bounded at 64 bytes. This entry declares and
+# carries 65, one past the limit.
+#
+# Why it matters: a bound that is not enforced at decode time lets an entry
+# carry data no conforming encoder could produce. The decoder must reject
+# the length prefix before reading the payload.
+#
+# Definitions (stellar/stellar-xdr at tag v28.0, commit 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694):
+#
+#   * `struct LedgerEntry` — Stellar-ledger-entries.x lines 548-586;
+#   * `enum LedgerEntryType` (OFFER = 2, DATA = 3) — Stellar-ledger-entries.x lines 92-104;
+#   * `struct DataEntry` — Stellar-ledger-entries.x lines 354-367;
+#   * `typedef string string64<64>;` — Stellar-ledger-entries.x line 14;
+#   * `typedef opaque DataValue<64>;` — Stellar-ledger-entries.x line 16.
+#
+# Malformation rule (documented, deterministic):
+# starting from that crate-produced encoding, the dataValue length prefix at
+# offset 56 is set from 64 to 65, one more 0xab byte is appended to the payload,
+# and the field is re-aligned with three zero pad bytes (65 -> 68). Every
+# byte before and after the field is unchanged.
+#
+# Generated and checked with the official `stellar-xdr 28.0.1` crate (features base64, alloc and std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28; rustc 1.97.1
+# (8bab26f4f 2026-07-14)) on 2026-11-20 (UTC):
+# the source value (the DATA entry above (name `config`) but with data_value = 64 bytes of 0xab, which sits exactly at the 64-byte limit and round-trips) was built and round-tripped with the
+# crate, the mutation above was applied as the only change, and
+# from_xdr returns Err ("xdr value max length exceeded") for the result.
+# The rejection is the over-limit length alone: the payload, padding and
+# following fields are all present and well formed.
+#
+# Is it deterministic: Yes. A fixed value and a fixed byte mutation.
+#
+# Every byte is a synthetic structural value, not a capture of a real network
+# object: no real account key, contract id, signature or secret key appears,
+# and nothing here was observed on a network or accepted by a host.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger-entries.x
+
+id = "p28-xdr-ledger-entry-data-value-too-long"
+protocol = 28
+surface = "xdr"
+category = "ledger-entry"
+description = "A DATA `LedgerEntry` whose dataValue exceeds its 64-byte bound is correctly rejected, not silently accepted"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger-entries.x"
+
+type = "LedgerEntry"
+kind = "decode-failure"
+value_base64 = "AAAABwAAAAMAAAAAEREREREREREREREREREREREREREREREREREREREREREAAAAGY29uZmlnAAAAAABBq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urq6sAAAAAAAAAAAAAAA=="

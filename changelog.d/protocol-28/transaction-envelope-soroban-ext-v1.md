@@ -1,0 +1,1 @@
+- Add a Protocol 28 Soroban TransactionEnvelope fixture whose SorobanTransactionData uses the V1 extension with a non-empty `archivedSorobanEntries` vector.

@@ -1,0 +1,62 @@
+# Protocol 28 / LedgerEntry: the DATA arm round-trips.
+#
+# What this tests:
+# A `LedgerEntry` with the DATA arm: a `DataEntry` named `config` (six bytes,
+# two pad bytes) holding the five bytes `01 02 03 04 05` (three pad bytes).
+#
+# Why it matters: the DATA arm was missing from the pack, and its two bounded
+# fields (string64 and opaque<64>) are the ones the paired negative fixtures
+# push past their limit. The account and data are synthetic: this does not
+# claim the entry is stored on any ledger.
+#
+# Definitions (stellar/stellar-xdr at tag v28.0, commit 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694):
+#
+#   * `struct LedgerEntry` — Stellar-ledger-entries.x lines 548-586;
+#   * `enum LedgerEntryType` (OFFER = 2, DATA = 3) — Stellar-ledger-entries.x lines 92-104;
+#   * `struct DataEntry` — Stellar-ledger-entries.x lines 354-367;
+#   * `typedef string string64<64>;` — Stellar-ledger-entries.x line 14;
+#   * `typedef opaque DataValue<64>;` — Stellar-ledger-entries.x line 16.
+#
+# Expected result and where it comes from: kind = "roundtrip" means a
+# decoder must accept this value and re-encoding it must reproduce
+# value_base64 byte for byte, not merely an equal value. The payload was
+# produced by a program that builds the typed value with the official `stellar-xdr 28.0.1` crate (features base64, alloc and std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28; rustc 1.97.1
+# (8bab26f4f 2026-07-14)) on 2026-11-20 (UTC)
+# and serialises it with to_xdr(Limits::none()), never hand-assembled.
+# Generation expression, recorded verbatim:
+#
+#   LedgerEntry {
+#       last_modified_ledger_seq: 7,
+#       data: LedgerEntryData::Data(DataEntry {
+#           account_id: AccountId(PublicKey::PublicKeyTypeEd25519(Uint256([0x11; 32]))),
+#           data_name: String64(b"config".to_vec().try_into().unwrap()),
+#           data_value: DataValue(vec![1, 2, 3, 4, 5].try_into().unwrap()),
+#           ext: DataEntryExt::V0,
+#       }),
+#       ext: LedgerEntryExt::V0,
+#   }
+#
+# The same program asserted the crate's own round trip: from_xdr returned
+# Ok, the decoded value equals the built one, and re-encoding it reproduced
+# the encoding exactly.
+#
+# Is it deterministic: Yes. The generator uses no randomness, clock or
+# network; the same expression always yields the same bytes.
+#
+# Every byte is a synthetic structural value, not a capture of a real network
+# object: no real account key, contract id, signature or secret key appears,
+# and nothing here was observed on a network or accepted by a host.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger-entries.x
+
+id = "p28-xdr-ledger-entry-data-roundtrip"
+protocol = 28
+surface = "xdr"
+category = "ledger-entry"
+description = "A `LedgerEntry` with the DATA arm round-trips byte-for-byte"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-ledger-entries.x"
+
+type = "LedgerEntry"
+kind = "roundtrip"
+value_base64 = "AAAABwAAAAMAAAAAEREREREREREREREREREREREREREREREREREREREREREAAAAGY29uZmlnAAAAAAAFAQIDBAUAAAAAAAAAAAAAAA=="

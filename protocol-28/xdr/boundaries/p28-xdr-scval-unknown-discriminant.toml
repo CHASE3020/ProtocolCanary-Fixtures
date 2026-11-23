@@ -1,0 +1,48 @@
+# Protocol 28 / ScVal: an out-of-range top-level SCValType discriminant is rejected.
+#
+# What this tests:
+# An `SCVal` whose type discriminant is 23. `enum SCValType` at v28.0 defines
+# 0 through 22 (SCV_EXECUTABLE_TAG = 22 is the last), so 23 names no arm.
+#
+# Why it matters: a decoder that maps an unknown arm onto a default, or reads
+# the following bytes as some other arm, accepts a value the protocol cannot
+# produce. The independent codec already rejects this; the Engine-consumed
+# pack did not carry the exact case.
+#
+# Definitions (stellar/stellar-xdr at tag v28.0, commit 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694):
+#
+#   * `enum SCValType` — Stellar-contract.x lines 26-81;
+#   * `union SCVal` — Stellar-contract.x lines 254-316.
+#
+# Malformation rule (documented, deterministic):
+# the crate-produced 8-byte encoding with exactly one field changed: the
+# 4-byte SCValType discriminant at offset 0 is set from 3 (SCV_U32) to 23.
+# The 4-byte body (the u32 7) is unchanged.
+#
+# Generated and checked with the official `stellar-xdr 28.0.1` crate (features base64, alloc and std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28; rustc 1.97.1
+# (8bab26f4f 2026-07-14)) on 2026-11-20 (UTC):
+# the source value (`ScVal::U32(7)`, encoded `00000003 00000007`) was built and round-tripped with the
+# crate, the mutation above was applied as the only change, and
+# from_xdr returns Err ("xdr value invalid") for the result.
+# The rejection is the undefined discriminant, not a truncation: four valid
+# body bytes follow it.
+#
+# Is it deterministic: Yes. A fixed value and a fixed byte mutation.
+#
+# Every byte is a synthetic structural value, not a capture of a real network
+# object: no real account key, contract id, signature or secret key appears,
+# and nothing here was observed on a network or accepted by a host.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x
+
+id = "p28-xdr-scval-unknown-discriminant"
+protocol = 28
+surface = "xdr"
+category = "scval"
+description = "A `ScVal` with an undefined top-level SCValType discriminant (23) is correctly rejected, not silently accepted"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x"
+
+type = "ScVal"
+kind = "decode-failure"
+value_base64 = "AAAAFwAAAAc="

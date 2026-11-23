@@ -400,37 +400,47 @@ class BaselineHashTest(unittest.TestCase):
     checksum against a half-written archive would be defeated.
 
     The values were recorded by building the same four artifacts from
-    ``upstream/main`` at ec10f95, before this branch changed any tool, and
-    re-recorded on 2026-10-26 when the three protocol-28 boundary fixtures
-    (issue #340) changed the pack's content, and again on 2026-11-20 when the
-    TransactionEnvelope upload, memo, time-bound and issued-asset fixtures
-    changed it: a content change legitimately moves all four hashes, while the
-    property being pinned stays the same -- the atomic write reproduces
-    whatever bytes the tools produce.
+    upstream/main at ec10f95, before this branch changed any tool, and
     re-recorded on 2026-11-20 when the Protocol 28 ScVal schema, null-map,
     scalar-endpoint and wide-integer fixtures (issues #503-#506) changed the
-    pack's content: a content change legitimately moves all four hashes,
+    pack's content, and again on 2026-11-20 when the one-byte padding,
+    invalid ScVal discriminant/flag, Offer/Data LedgerEntry and muxed
+    operation-source fixtures (issues #507-#509, #514) changed it again, and
+    for the StellarValue upgrade-bound, Soroban ext V1 and AccountEntry
+    inflationDest fixtures (issues #515, #518, #523), and for the CREATE_ACCOUNT
+    operation fixture (issue #540), and for the CREATE_PASSIVE_SELL_OFFER,
+    MANAGE_BUY_OFFER, muxed-tx-source, and LedgerEntry scalar-boundary
+    fixtures (issues #556, #557, #558, #561), and for the void
+    operation arms fixture (issue #543), and for the ACCOUNT_MERGE
+    fixture (issue #542), and for the Protocol 28
+    MANAGE_SELL_OFFER envelope fixture (issue #555), and for the
+    liveUntilLedgerSeq endpoint fixtures (issue #531), and for the
+    MANAGE_DATA operation fixture (issue #544), and for the
+    Transaction operation vector limit fixtures (issue #532), and for the
+    BUMP_SEQUENCE signed boundary fixture (issue #545), and for the
+    TransactionEnvelope upload, memo, time-bound and issued-asset fixtures
+    (issues #510-#513): a content change legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
     Recompute them with:
         python3 tools/pack/pack.py protocol-28 --version 1.0.0 --output-dir D
-        python3 tools/release/manifest.py D/protocolcanary-fixtures-1.0.0.tar.gz \\
-            --revision 0123456789abcdef0123456789abcdef01234567 --engine 0.2.0 \\
-            --output D/protocolcanary-fixtures-1.0.0.manifest.json \\
+        python3 tools/release/manifest.py D/protocolcanary-fixtures-1.0.0.tar.gz \
+            --revision 0123456789abcdef0123456789abcdef01234567 --engine 0.2.0 \
+            --output D/protocolcanary-fixtures-1.0.0.manifest.json \
             --sha256-file D/protocolcanary-fixtures-1.0.0.tar.gz.sha256
         python3 tools/registry/generate.py protocol-28 --output D/registry-v1.json
     """
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "8355c0b687189931e526ae7443fbc93b705565fa36a0027e778c800b6d80af3d",
+            "54b22eb92db5e72dc9799e3786b7eace15118cbd827527a5dc79a6144b26ea7f",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "ea56db32f4dcdf53f4c1a9c66a6d828c0c69a48876d3f7cc9690de4d98214a6d",
+            "e5328380bfa2332bd3bdf0031231c1ee3000550c4e81793e6fd2f7f58a4f5c88",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "ecc01471923487540a472ae699ab8210b8e6f166281c4dd49f709074270672bf",
+            "b8e4c60838c0b5d2123c384583281c2e5527a987c7456f0a0afea702cd4b745a",
         "registry-v1.json":
-            "3422dffdbf14b3df9e04258db51a417e32504da5f7ce1f3eca51aa331678dc47",
+            "d2d2d1bdf4531bfb422f507d44bfca0bb58184b80797570647dce87a92af8b79",
     }
 
     def setUp(self) -> None:

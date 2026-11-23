@@ -1,0 +1,47 @@
+# Protocol 30 / CAP-84: muxed-contract address with interior id = zero, the lowest uint64.
+#
+# What this tests: CAP-84 defines SC_ADDRESS_TYPE_MUXED_CONTRACT = 5 and
+# MuxedContract as { uint64 id; ContractID contractId; }. The existing
+# p30-xdr-cap0084-muxed-contract-address-roundtrip fixture uses an interior
+# id and the focused codec test rejects values above uint64, but no fixture
+# exercised an accepted endpoint. This fixture pins the encoding of the id
+# zero endpoint.
+#
+# Why it matters: a decoder that reads the id as a signed int64, or that
+# truncates it, would misread the zero endpoint's neighbours while
+# still passing the interior-value fixture.
+#
+# Expected result: kind = "roundtrip"; decoding and re-encoding must
+# reproduce value_base64 exactly. Built with the official `stellar-xdr`
+# 30.0.0 Rust crate (features base64, alloc, std), never hand-assembled:
+#
+#   ScVal::Address(ScAddress::MuxedContract(MuxedContract {
+#       id: 0,
+#       contract_id: ContractId(Hash([0x22; 32])),
+#   })).to_xdr_base64(Limits::none())
+#
+# rustc 1.97.1 (8bab26f4f 2026-07-14); generated 2026-11-20 (UTC). The same
+# crate decoded the bytes and re-encoded them identically. The field values
+# are also asserted by the standard-library Python decoder in
+# tests/scval_xdr.py (tests/test_protocol30_cap84_id_boundaries.py).
+# Deterministic: no randomness, clock or network input.
+#
+# All bytes are synthetic sentinels, not a captured or deployed contract
+# address. This vector proves XDR layout only, not host behavior, strkey
+# validity, contract existence, or complete Protocol 30 compatibility.
+#
+# CAP-84: https://github.com/stellar/stellar-protocol/blob/1ae39233055a0fb94bb737650a39ede8d77d924c/core/cap-0084.md
+# Generated XDR types:
+# https://github.com/stellar/rs-stellar-xdr/blob/v30.0.0/src/generated/sc_address.rs
+# https://github.com/stellar/rs-stellar-xdr/blob/v30.0.0/src/generated/muxed_contract.rs
+
+id = "p30-xdr-cap0084-muxed-contract-id-zero"
+protocol = 30
+surface = "xdr"
+category = "cap-0084"
+description = "A ScVal CAP-84 muxed contract address with id 0 round-trips byte-for-byte"
+source_reference = "https://github.com/stellar/stellar-protocol/blob/1ae39233055a0fb94bb737650a39ede8d77d924c/core/cap-0084.md"
+
+type = "ScVal"
+kind = "roundtrip"
+value_base64 = "AAAAEgAAAAUAAAAAAAAAACIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIi"

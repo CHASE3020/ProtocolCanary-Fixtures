@@ -1,0 +1,1 @@
+- Add Protocol 28 pack fixtures for an out-of-range top-level `ScVal` discriminant (3 -> 23) and for `SCVec` and `SCMap` optional-pointer flags of 2, each derived from a crate-produced value with one documented four-byte change; the pack XDR test now accepts `flag` as a structural rejection reason.

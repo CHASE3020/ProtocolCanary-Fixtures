@@ -1,0 +1,49 @@
+# Protocol 28 / CAP-0085: an external-reference tag whose pad byte is nonzero is rejected.
+#
+# What this tests:
+# Complements p28-xdr-cap85-external-ref-tag-three-byte-roundtrip.toml: the
+# same 48 bytes except the single pad byte after the `v28` tag is 0x01.
+#
+# Why it matters:
+# RFC 4506 (sections 4.10 and 4.11) requires the residual bytes that align
+# variable-length data to a 4-byte boundary to be zero. A decoder that ignores
+# the pad byte would map two different byte strings to one value, so byte-
+# identity round trips would stop meaning anything.
+#
+# Definitions (stellar/stellar-xdr at tag v28.0, commit 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694):
+#
+#   * `struct ContractExecutableExternalRef` — Stellar-contract.x lines 224-227;
+#   * `union ContractExecutable` (case CONTRACT_EXECUTABLE_EXTERNAL_REF, discriminant 2) — Stellar-contract.x;
+#   * `typedef string SCString<>;` — Stellar-contract.x line 10.
+#
+# Malformation rule (documented, deterministic):
+# the crate-produced 48-byte encoding with exactly one byte changed: the
+# pad byte at offset 47 (the last byte, after the tag `v28`) is set from 0x00
+# to 0x01. The union discriminant, owner address and tag length are unchanged.
+#
+# Generated and checked with the official `stellar-xdr 28.0.1` crate (features base64, alloc and std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28; rustc 1.97.1
+# (8bab26f4f 2026-07-14)) on 2026-11-20 (UTC):
+# the source value (the external reference in p28-xdr-cap85-external-ref-tag-three-byte-roundtrip.toml) was built and round-tripped with the
+# crate, the mutation above was applied as the only change, and
+# from_xdr returns Err ("xdr padding contains non-zero bytes") for the result.
+# The rejection is the nonzero pad byte alone; every other field is well formed.
+#
+# Is it deterministic: Yes. A fixed value and a fixed byte mutation.
+#
+# Every byte is a synthetic structural value, not a capture of a real network
+# object: no real account key, contract id, signature or secret key appears,
+# and nothing here was observed on a network or accepted by a host.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x
+
+id = "p28-xdr-cap85-external-ref-tag-nonzero-padding"
+protocol = 28
+surface = "xdr"
+category = "cap-0085"
+description = "A CAP-0085 external reference whose tag pad byte is nonzero is correctly rejected, not silently accepted"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-contract.x"
+
+type = "ContractExecutable"
+kind = "decode-failure"
+value_base64 = "AAAAAgAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVQAAAAN2MjgB"

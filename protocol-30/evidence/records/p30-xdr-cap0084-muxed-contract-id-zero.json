@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p30-xdr-cap0084-muxed-contract-id-zero",
+  "fixtureSha256": "37ee8853b402bc58d486bba3d467f27c309ebce32089c4e36f76cd8437f3e2f0",
+  "method": "structural",
+  "checkedAt": "2026-11-20T19:16:14Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "a2ea9f5bb38c8513748c67083d235de5a250efef"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

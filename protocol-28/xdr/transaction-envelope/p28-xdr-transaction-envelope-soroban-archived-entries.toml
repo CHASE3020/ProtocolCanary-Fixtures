@@ -1,0 +1,86 @@
+# Protocol 28 / TransactionEnvelope: Soroban data with the V1 resource extension.
+#
+# What this tests: p28-xdr-transaction-envelope-soroban-invoke-roundtrip uses
+# SorobanTransactionDataExt::V0. This fixture is the same envelope with the
+# extension switched to V1, whose SorobanResourcesExtV0 body carries
+# `uint32 archivedSorobanEntries<>` = [0, 3, 4294967295]. Everything else
+# (source, fee, sequence, the single InvokeContract operation, empty
+# footprint and auth vectors, resources, resource fee, signature) is copied
+# from that baseline.
+#
+# Definitions (stellar/stellar-xdr tag v28.0, commit
+# 9c9c145953e80990d6ff1ae3a6a973a0ce6d0694), Stellar-transaction.x:
+# `struct SorobanResourcesExtV0` and the `ext` union of
+# `struct SorobanTransactionData` (case 0: void; case 1:
+# SorobanResourcesExtV0 resourceExt).
+#
+# Why it matters: a decoder that ignores the SorobanTransactionData ext
+# discriminant would read the archived-entry vector as the footprint and
+# corrupt every later field.
+#
+# Expected result: kind = "roundtrip"; decoding and re-encoding must
+# reproduce value_base64 exactly. Built with the official crate, never
+# hand-assembled:
+#
+#   TransactionEnvelope::Tx(TransactionV1Envelope {
+#       tx: Transaction {
+#           source_account: MuxedAccount::Ed25519(Uint256([0x77; 32])),
+#           fee: 200_000,
+#           seq_num: SequenceNumber(3_456_789),
+#           cond: Preconditions::None,
+#           memo: Memo::None,
+#           operations: vec![Operation {
+#               source_account: None,
+#               body: OperationBody::InvokeHostFunction(InvokeHostFunctionOp {
+#                   host_function: HostFunction::InvokeContract(InvokeContractArgs {
+#                       contract_address: ScAddress::Contract(ContractId(Hash([0xab; 32]))),
+#                       function_name: ScSymbol::try_from("hello").unwrap(),
+#                       args: VecM::default(),
+#                   }),
+#                   auth: VecM::default(),
+#               }),
+#           }].try_into().unwrap(),
+#           ext: TransactionExt::V1(SorobanTransactionData {
+#               ext: SorobanTransactionDataExt::V1(SorobanResourcesExtV0 {
+#                   archived_soroban_entries: vec![0u32, 3, 4_294_967_295].try_into().unwrap(),
+#               }),
+#               resources: SorobanResources {
+#                   footprint: LedgerFootprint {
+#                       read_only: VecM::default(),
+#                       read_write: VecM::default(),
+#                   },
+#                   instructions: 1_000,
+#                   disk_read_bytes: 100,
+#                   write_bytes: 100,
+#               },
+#               resource_fee: 1_000,
+#           }),
+#       },
+#       signatures: vec![DecoratedSignature {
+#           hint: SignatureHint([0x88; 4]),
+#           signature: Signature(BytesM::try_from(vec![0x88; 64]).unwrap()),
+#       }].try_into().unwrap(),
+#   }).to_xdr_base64(Limits::none())
+#
+# Crate: official `stellar-xdr` 28.0.1 (features base64, alloc, std — the
+# crate version Protocol-Canary's canary-xdr pins for Protocol 28);
+# rustc 1.97.1 (8bab26f4f 2026-07-14); generated 2026-11-20 (UTC). The same crate decoded
+# the bytes and re-encoded them identically. Deterministic.
+#
+# This is a structural XDR vector, not a Soroban simulation and not an
+# observation of archived ledger entries. The archived-entry indices do not
+# refer to real ledger data (the footprint is empty), the envelope was never
+# submitted, and the 0x88 signature is not a valid signature.
+#
+# Definition: https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-transaction.x
+
+id = "p28-xdr-transaction-envelope-soroban-archived-entries"
+protocol = 28
+surface = "xdr"
+category = "transaction-envelope"
+description = "A Soroban v1 TransactionEnvelope whose SorobanTransactionData ext is V1 with archivedSorobanEntries round-trips byte-for-byte"
+source_reference = "https://github.com/stellar/stellar-xdr/blob/9c9c145953e80990d6ff1ae3a6a973a0ce6d0694/Stellar-transaction.x"
+
+type = "TransactionEnvelope"
+kind = "roundtrip"
+value_base64 = "AAAAAgAAAAB3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3dwADDUAAAAAAADS/FQAAAAAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAAAGrq6urq6urq6urq6urq6urq6urq6urq6urq6urq6urqwAAAAVoZWxsbwAAAAAAAAAAAAAAAAAAAQAAAAEAAAADAAAAAAAAAAP/////AAAAAAAAAAAAAAPoAAAAZAAAAGQAAAAAAAAD6AAAAAGIiIiIAAAAQIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIg="

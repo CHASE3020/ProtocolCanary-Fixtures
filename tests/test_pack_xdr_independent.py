@@ -65,7 +65,7 @@ class PackXdrIndependentTests(unittest.TestCase):
                             scval_xdr.decode(raw_bytes)
                         err_msg = str(caught.exception).lower()
                         self.assertTrue(
-                            any(term in err_msg for term in ("truncated", "need", "length", "limit", "padding", "discriminant", "unsupported")),
+                            any(term in err_msg for term in ("truncated", "need", "length", "limit", "padding", "discriminant", "unsupported", "flag")),
                             f"Unexpected error reason for {fixture_id}: {caught.exception}",
                         )
                     else:

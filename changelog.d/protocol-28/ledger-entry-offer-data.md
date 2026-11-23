@@ -1,0 +1,1 @@
+- Add Protocol 28 `LedgerEntry` fixtures for the OFFER and DATA arms, plus DATA entries whose `dataName` (string64) and `dataValue` (opaque<64>) are one byte over their 64-byte bound, and implement both arms in the independent `tests/xdr_codec.py` codec.

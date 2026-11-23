@@ -1,0 +1,1 @@
+- Add a Protocol 28 ACCOUNT LedgerEntry fixture with a present `inflationDest` pointer.
