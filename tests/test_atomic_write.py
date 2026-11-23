@@ -407,7 +407,17 @@ class BaselineHashTest(unittest.TestCase):
     invalid ScVal discriminant/flag, Offer/Data LedgerEntry and muxed
     operation-source fixtures (issues #507-#509, #514) changed it again, and
     for the StellarValue upgrade-bound, Soroban ext V1 and AccountEntry
-    inflationDest fixtures (issues #515, #518, #523): a content change legitimately moves all four hashes,
+    inflationDest fixtures (issues #515, #518, #523), and for the CREATE_ACCOUNT
+    operation fixture (issue #540), and for the CREATE_PASSIVE_SELL_OFFER,
+    MANAGE_BUY_OFFER, muxed-tx-source, and LedgerEntry scalar-boundary
+    fixtures (issues #556, #557, #558, #561), and for the void
+    operation arms fixture (issue #543), and for the ACCOUNT_MERGE
+    fixture (issue #542), and for the Protocol 28
+    MANAGE_SELL_OFFER envelope fixture (issue #555), and for the
+    liveUntilLedgerSeq endpoint fixtures (issue #531), and for the
+    MANAGE_DATA operation fixture (issue #544), and for the
+    Transaction operation vector limit fixtures (issue #532): a content change
+    legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
@@ -422,13 +432,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "af8ef7741e640f8fc22845fcf626bf1ddb243111c6033927ae8d0934f6033de0",
+            "7e42ba38678f3e92278c75d429c96dce71039c7768c8296f07f675fb318e3ba7",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "328fc5e59b63f6483f029be9b6491a0e1abc11cdd1a1c453e0209809d828684c",
+            "2835edf9a60db9ade42dc624e84fc84e7278f06ed13b53d2f7cfb0668a21e4e9",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "37645d5daeb8b252471b32687c94586eeea5b5ac77a0e80693e98cc19189bcc7",
+            "a93352fa02e497d193c29612da8800fa33953622294905671fded31e4031b380",
         "registry-v1.json":
-            "c885d482f0f7c51022c5c1c4db12930e5a90d72d8c6b2887fe03db9ba1e7f791",
+            "ca11f7190ba10f6721e639be9c36f4c398a2a800fadc7490a7f52b8f8deaa54d",
     }
 
     def setUp(self) -> None:
