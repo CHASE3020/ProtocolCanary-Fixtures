@@ -414,7 +414,8 @@ class BaselineHashTest(unittest.TestCase):
     operation arms fixture (issue #543), and for the ACCOUNT_MERGE
     fixture (issue #542), and for the Protocol 28
     MANAGE_SELL_OFFER envelope fixture (issue #555), and for the
-    liveUntilLedgerSeq endpoint fixtures (issue #531): a content change
+    liveUntilLedgerSeq endpoint fixtures (issue #531), and for the
+    MANAGE_DATA operation fixture (issue #544): a content change
     legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
@@ -430,13 +431,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "29a9e60d59da3803a16062c30f1ec2842eb3551dcc871feaf72c216e482affc2",
+            "82cfdcb9667ac4416552deac576078088da348133a93533579539e20ef233aa3",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "e270def5bf2b725f4487ea9afd562d534f0a9a746f25775cdb3d6dd88992d98c",
+            "cc78747d91f80cb7b06a7d91ab0b31b87071b2a4f746dd7240fc3bc12eb58d21",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "2c91978058a5656204b90670c7927f1888f873b5ab048fab7f017ad3ff735be6",
+            "ab9329eb5b15e3df077e059733a43db3cab0a6053b64083352e9a7067ff8d0aa",
         "registry-v1.json":
-            "16fc79bd4817b52b03597c506c2eec093ead497572ce64ba48c08b45537e757d",
+            "34784a7fe619fb2fd5ac7555649e9f90cff7812fad0ace56d0f0bedeba917c6f",
     }
 
     def setUp(self) -> None:
