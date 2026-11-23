@@ -70,6 +70,38 @@ def validate_id_rule(fixture_id: str) -> str | None:
 
 
 def render_skeleton(surface: str, protocol: int, fixture_id: str, category: str) -> str:
+    """Render a skeleton fixture template with section headers and explicit placeholders.
+
+    The scaffold output is not usable verification evidence until explicitly completed
+    with verified evidence, authoritative source references, and valid payloads.
+    Untouched skeletons intentionally fail validator checks.
+
+    Args:
+        surface: The target fixture surface. Accepted values are "xdr", "rpc",
+            or "soroban" (from validate.SURFACES).
+        protocol: The target protocol version as a positive integer.
+        fixture_id: A unique lowercase fixture identifier matching schema requirements.
+        category: The fixture category (e.g. "cap-0083", "ledger", "smoke").
+
+    Returns:
+        A TOML string containing required header documentation sections,
+        metadata declarations, and surface-specific body templates.
+
+    Placeholders:
+        Values containing "TODO" are intentional placeholders that must be replaced:
+        - Header documentation comments (# TODO: ...) for test intent, rationale,
+          protocol origin, expected results/sources, and determinism.
+        - "description" ("TODO: Brief description of the fixture").
+        - "source_reference" ("TODO-REPLACE-WITH-CHECKED-SOURCE").
+        - For surface "xdr": "type" ("TODO-XDR-TYPE"), "kind" ("TODO-XDR-KIND"),
+          and "value_base64" ("TODO-BASE64-PAYLOAD").
+        - For surface "rpc": "method" ("TODO-RPC-METHOD"), and assert array table fields
+          "kind" ("TODO-ASSERT-KIND"), "field" ("TODO-RESPONSE-FIELD"), and "value"
+          ("TODO-EXPECTED-VALUE").
+        - For surface "soroban": "source_account" ("TODO-SOURCE-ACCOUNT"), "contract_id"
+          ("TODO-CONTRACT-ID"), "function" ("TODO-FUNCTION-NAME"), "sequence_number"
+          ("TODO-SEQUENCE-NUMBER"), and expect section "kind" ("TODO-EXPECT-KIND").
+    """
     lines = [
         "# What this tests:",
         "# TODO: Describe what Stellar behavior this fixture tests.",
