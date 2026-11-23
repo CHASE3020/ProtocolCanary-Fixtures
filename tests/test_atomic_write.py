@@ -408,7 +408,9 @@ class BaselineHashTest(unittest.TestCase):
     operation-source fixtures (issues #507-#509, #514) changed it again, and
     for the StellarValue upgrade-bound, Soroban ext V1 and AccountEntry
     inflationDest fixtures (issues #515, #518, #523), and for the CREATE_ACCOUNT
-    operation fixture (issue #540): a content change legitimately moves all four hashes,
+    operation fixture (issue #540), and for the CREATE_PASSIVE_SELL_OFFER,
+    MANAGE_BUY_OFFER, muxed-tx-source, and LedgerEntry scalar-boundary
+    fixtures (issues #556, #557, #558, #561): a content change legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
@@ -423,13 +425,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "b1262390eda2096f6d7ed342c9a2065e327cd7b77db90ec9e1995119bda7f0cb",
+            "9decbb78186341f263d7aa17421236e9caecae4c34f0ba3960310e2f6a0ffd67",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "1f34ab99f4e13e2d922a554de15aef9ad56bac93475c3ddea6340d909b4493ac",
+            "38bfafe5364c8944f4e6b14781f0eab4866eaaecff20a94d4be2d9f8f45f3e05",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "9abd398dcea85c35197fb6edadd762c158be8ea0d66ee8176bc6e603f16ab14a",
+            "54d4ba8ff9e908e827a9402d267e827aedd63e0a4258e26a58dd8373960b47cf",
         "registry-v1.json":
-            "55c9a03c9981bc0f41b1bbfadd40288cc5eeb1ba0e736028fe68d0a446959b08",
+            "986243d0442eed2c299a09935cddcbe62173866325ee53081eed15a2e916e92b",
     }
 
     def setUp(self) -> None:
