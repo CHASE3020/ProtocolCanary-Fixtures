@@ -407,7 +407,15 @@ class BaselineHashTest(unittest.TestCase):
     invalid ScVal discriminant/flag, Offer/Data LedgerEntry and muxed
     operation-source fixtures (issues #507-#509, #514) changed it again, and
     for the StellarValue upgrade-bound, Soroban ext V1 and AccountEntry
-    inflationDest fixtures (issues #515, #518, #523): a content change legitimately moves all four hashes,
+    inflationDest fixtures (issues #515, #518, #523), and for the CREATE_ACCOUNT
+    operation fixture (issue #540), and for the CREATE_PASSIVE_SELL_OFFER,
+    MANAGE_BUY_OFFER, muxed-tx-source, and LedgerEntry scalar-boundary
+    fixtures (issues #556, #557, #558, #561), and for the void
+    operation arms fixture (issue #543), and for the ACCOUNT_MERGE
+    fixture (issue #542), and for the Protocol 28
+    MANAGE_SELL_OFFER envelope fixture (issue #555), and for the
+    liveUntilLedgerSeq endpoint fixtures (issue #531): a content change
+    legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
@@ -422,20 +430,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "35407c96b54f6754f4e9e9c6c32217ae50c304693ece338403534ded23d62ccb",
+            "29a9e60d59da3803a16062c30f1ec2842eb3551dcc871feaf72c216e482affc2",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "22d160ac7a4b9c71e66d8961b0ae8e4bac4994d2ebba1c0b69cd5504d575f7be",
+            "e270def5bf2b725f4487ea9afd562d534f0a9a746f25775cdb3d6dd88992d98c",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "4a150eff70be271f215b5be1e35068de847a122fcb4da39dd69452f2c1f5789d",
+            "2c91978058a5656204b90670c7927f1888f873b5ab048fab7f017ad3ff735be6",
         "registry-v1.json":
-            "cea2cc9979a27ffab1fda24de11eea977fe2346c67d808bb821ae605838494f5",
-            "87df79c27909621237897ba51c807a9cdc18f3f53c69cd7ea4d1d7237794ae6b",
-        "protocolcanary-fixtures-1.0.0.manifest.json":
-            "f9d27d0396a164763766877407d0ae27a3b1f5f713dfc13bd073da6338ffb1a5",
-        "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "6ba3d72c87b404f451f4b4c53ae7c97a5b757ab101c9b51897734ba24d8cb781",
-        "registry-v1.json":
-            "881c28d41b6da0b858c2ab97f5e53054bbc20907e4a91f6ae51b721c8e2273f8",
+            "16fc79bd4817b52b03597c506c2eec093ead497572ce64ba48c08b45537e757d",
     }
 
     def setUp(self) -> None:
