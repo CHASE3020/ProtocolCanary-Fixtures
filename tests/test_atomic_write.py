@@ -407,7 +407,18 @@ class BaselineHashTest(unittest.TestCase):
     invalid ScVal discriminant/flag, Offer/Data LedgerEntry and muxed
     operation-source fixtures (issues #507-#509, #514) changed it again, and
     for the StellarValue upgrade-bound, Soroban ext V1 and AccountEntry
-    inflationDest fixtures (issues #515, #518, #523): a content change legitimately moves all four hashes,
+    inflationDest fixtures (issues #515, #518, #523), and for the CREATE_ACCOUNT
+    operation fixture (issue #540), and for the CREATE_PASSIVE_SELL_OFFER,
+    MANAGE_BUY_OFFER, muxed-tx-source, and LedgerEntry scalar-boundary
+    fixtures (issues #556, #557, #558, #561), and for the void
+    operation arms fixture (issue #543), and for the ACCOUNT_MERGE
+    fixture (issue #542), and for the Protocol 28
+    MANAGE_SELL_OFFER envelope fixture (issue #555), and for the
+    liveUntilLedgerSeq endpoint fixtures (issue #531), and for the
+    MANAGE_DATA operation fixture (issue #544), and for the
+    Transaction operation vector limit fixtures (issue #532), and for the
+    BUMP_SEQUENCE signed boundary fixture (issue #545): a content change
+    legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
@@ -422,13 +433,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "87df79c27909621237897ba51c807a9cdc18f3f53c69cd7ea4d1d7237794ae6b",
+            "c97df093a9e36eb50abf95447d7d7b26189f0802b4394ad757434099896dc65c",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "f9d27d0396a164763766877407d0ae27a3b1f5f713dfc13bd073da6338ffb1a5",
+            "1eb84aca4ae4c013016d253660542beffcc6fa7ef3555de14dce53f5a4cad4a0",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "6ba3d72c87b404f451f4b4c53ae7c97a5b757ab101c9b51897734ba24d8cb781",
+            "588873acc32360b2a2217b2368bcd2779a30ad437ccadb5234517c683be6664a",
         "registry-v1.json":
-            "881c28d41b6da0b858c2ab97f5e53054bbc20907e4a91f6ae51b721c8e2273f8",
+            "10e3c07639240254469ed91f5aa178ce89d449d2557455ba99748551925342c8",
     }
 
     def setUp(self) -> None:
