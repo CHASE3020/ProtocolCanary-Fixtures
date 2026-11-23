@@ -17,6 +17,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import pack_support as support  # noqa: E402
@@ -269,6 +270,42 @@ class HostileRegistryArchiveTests(unittest.TestCase):
         blob.write_bytes(raw.getvalue())
         with self.assertRaisesRegex(manifest.ManifestError, "far larger"):
             self.build(blob)
+
+    def test_an_archive_over_the_byte_cap_is_refused_before_being_read(self) -> None:
+        """The on-disk size is checked before ``read_bytes`` (issue #570)."""
+        support.write_pack(self.root)
+        info = pack.build_archive(self.root / "pack", self.root / "out", "1.0.0")
+        with mock.patch.object(manifest, "_MAX_ARCHIVE_BYTES", 100):
+            with mock.patch.object(Path, "read_bytes") as read_bytes:
+                with self.assertRaisesRegex(manifest.ManifestError, "archive limit"):
+                    self.build(info.path)
+        read_bytes.assert_not_called()
+
+    def test_an_archive_with_a_duplicate_member_is_refused(self) -> None:
+        path = support.tar_gz(
+            [
+                support.entry("xdr/a.toml", support.A_TOML),
+                support.entry("xdr/a.toml", support.A_TOML),
+            ],
+            self.root / "protocolcanary-fixtures-1.0.0.tar.gz",
+        )
+        with self.assertRaisesRegex(manifest.ManifestError, "duplicate member name"):
+            self.build(path)
+
+    def test_a_registry_version_other_than_one_is_refused(self) -> None:
+        registry = self.golden_registry()
+        registry["registryVersion"] = 2
+        with self.assertRaisesRegex(manifest.ManifestError, "registryVersion 1"):
+            self.build(self.archive_with_registry(json.dumps(registry).encode("utf-8")))
+
+    def test_a_negative_protocol_is_refused(self) -> None:
+        registry = self.golden_registry()
+        registry["protocol"] = -1
+        with self.assertRaisesRegex(manifest.ManifestError, "non-negative"):
+            self.build(self.archive_with_registry(json.dumps(registry).encode("utf-8")))
+
+    def test_manifest_errors_are_value_errors(self) -> None:
+        self.assertTrue(issubclass(manifest.ManifestError, ValueError))
 
     def test_an_explicit_version_must_be_exact(self) -> None:
         support.write_pack(self.root)
