@@ -407,7 +407,8 @@ class BaselineHashTest(unittest.TestCase):
     invalid ScVal discriminant/flag, Offer/Data LedgerEntry and muxed
     operation-source fixtures (issues #507-#509, #514) changed it again, and
     for the StellarValue upgrade-bound, Soroban ext V1 and AccountEntry
-    inflationDest fixtures (issues #515, #518, #523): a content change legitimately moves all four hashes,
+    inflationDest fixtures (issues #515, #518, #523), and for the CREATE_ACCOUNT
+    operation fixture (issue #540): a content change legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
@@ -422,13 +423,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "87df79c27909621237897ba51c807a9cdc18f3f53c69cd7ea4d1d7237794ae6b",
+            "b1262390eda2096f6d7ed342c9a2065e327cd7b77db90ec9e1995119bda7f0cb",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "f9d27d0396a164763766877407d0ae27a3b1f5f713dfc13bd073da6338ffb1a5",
+            "1f34ab99f4e13e2d922a554de15aef9ad56bac93475c3ddea6340d909b4493ac",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "6ba3d72c87b404f451f4b4c53ae7c97a5b757ab101c9b51897734ba24d8cb781",
+            "9abd398dcea85c35197fb6edadd762c158be8ea0d66ee8176bc6e603f16ab14a",
         "registry-v1.json":
-            "881c28d41b6da0b858c2ab97f5e53054bbc20907e4a91f6ae51b721c8e2273f8",
+            "55c9a03c9981bc0f41b1bbfadd40288cc5eeb1ba0e736028fe68d0a446959b08",
     }
 
     def setUp(self) -> None:
