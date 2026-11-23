@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-stellar-value-close-time-zero",
+  "fixtureSha256": "4fccfb2fcbcc9ca13ae7fb372e913a2cf7adfda9e92b4b8be9050edd20e96c36",
+  "method": "structural",
+  "checkedAt": "2026-11-23T00:00:00Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "249b523f90d820917564550d6018c988ce4a8536"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

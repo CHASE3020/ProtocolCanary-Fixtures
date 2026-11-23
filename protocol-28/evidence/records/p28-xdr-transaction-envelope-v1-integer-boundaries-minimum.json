@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-transaction-envelope-v1-integer-boundaries-minimum",
+  "fixtureSha256": "c5666d474dca375049fd11736b723670bd854572334bf10378376946e2c5924a",
+  "method": "structural",
+  "checkedAt": "2026-11-23T00:00:00Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "249b523f90d820917564550d6018c988ce4a8536"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}

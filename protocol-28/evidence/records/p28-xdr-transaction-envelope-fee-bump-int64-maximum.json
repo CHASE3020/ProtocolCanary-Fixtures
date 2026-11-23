@@ -1,0 +1,13 @@
+{
+  "verificationVersion": 1,
+  "fixtureId": "p28-xdr-transaction-envelope-fee-bump-int64-maximum",
+  "fixtureSha256": "9fd8ac99a79412581887d1d082b29572d1d04fe2a1c8a1559754c823fb9aca39",
+  "method": "structural",
+  "checkedAt": "2026-11-23T00:00:00Z",
+  "verifier": {
+    "name": "protocolcanary-fixtures-validate",
+    "version": "249b523f90d820917564550d6018c988ce4a8536"
+  },
+  "outcome": "matched",
+  "evidenceRef": null
+}
