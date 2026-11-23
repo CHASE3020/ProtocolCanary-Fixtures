@@ -411,7 +411,8 @@ class BaselineHashTest(unittest.TestCase):
     operation fixture (issue #540), and for the CREATE_PASSIVE_SELL_OFFER,
     MANAGE_BUY_OFFER, muxed-tx-source, and LedgerEntry scalar-boundary
     fixtures (issues #556, #557, #558, #561), and for the void
-    operation arms fixture (issue #543): a content change legitimately moves all four hashes,
+    operation arms fixture (issue #543), and for the ACCOUNT_MERGE
+    fixture (issue #542): a content change legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
@@ -426,13 +427,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "9bca1f1c6fe611af70f87530677a83679fa8e6dba2571189a99551d5ba3e86f8",
+            "466c430d77a84b61354cf8c4daf0208eb63a1ceb5f31637178dc76c2e23990a4",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "b98fcbf2fbbda98d2a9354fe2a78f50e6440bc3171c6b6a2afc2c85bb91666dc",
+            "6ece3c94ba65a513870cf62bc5c5153ed1829b11f1be6229fa32cbe85c1ed92d",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "fc1e6a935a772c4d7ff1119d860d1305b32d21888e17e80bbb079a7240bfb83f",
+            "d4c6f9b2f9d4e07d2f5d7f5fc7634f6d32bbcfe8514bd46ad34c492a4b9fdd53",
         "registry-v1.json":
-            "21acc48fce788c7880d2455769e312e898eb2108097ab8e74470c2ae86115cf6",
+            "28e672d44682298529ca5acb06cd0371665ff9959cebf390ab9aa1ad8af17e58",
     }
 
     def setUp(self) -> None:
