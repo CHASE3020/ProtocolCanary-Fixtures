@@ -422,13 +422,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "f09f254c2553b0056b2b190a1192ba0d5e55da570f4d1995cd36281bcbd1386c",
+            "87df79c27909621237897ba51c807a9cdc18f3f53c69cd7ea4d1d7237794ae6b",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "906e95212213b1b13747b471b0a07582848ed0d9c461a50a6589e5526fb0068f",
+            "f9d27d0396a164763766877407d0ae27a3b1f5f713dfc13bd073da6338ffb1a5",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "b4719fb327018ac7940c59afb05b63eb8183029eafca6010cee16bbac9fc0891",
+            "6ba3d72c87b404f451f4b4c53ae7c97a5b757ab101c9b51897734ba24d8cb781",
         "registry-v1.json":
-            "de04fde6f030baa8a8acc280c67039a80beaaafb7c0e3d929721ec0b871e8a2d",
+            "881c28d41b6da0b858c2ab97f5e53054bbc20907e4a91f6ae51b721c8e2273f8",
     }
 
     def setUp(self) -> None:
