@@ -225,6 +225,67 @@ class ManifestTests(unittest.TestCase):
         self.assertFalse(list(self.root.glob("nope*.json")))
 
 
+class MissingDigestTests(unittest.TestCase):
+    """A release manifest is incomplete without both cryptographic digests.
+
+    ``packDigest`` identifies the fixture content the archive carries and
+    ``archive.sha256`` identifies the published archive bytes; neither may be
+    omitted, and neither may be present in a malformed form.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+        support.write_pack(self.root)
+        info = pack.build_archive(self.root / "pack", self.root / "out", "1.4.2")
+        self.document = manifest.build_manifest(
+            info.path, revision=support.REVISION, engines=["0.2.0"]
+        )
+
+    def copy(self) -> dict:
+        return json.loads(json.dumps(self.document))
+
+    def test_a_complete_manifest_passes_schema_validation(self) -> None:
+        self.assertEqual(schema_problems(self.copy()), [])
+
+    def test_a_missing_pack_digest_is_rejected_descriptively(self) -> None:
+        document = self.copy()
+        del document["packDigest"]
+        problems = schema_problems(document)
+        self.assertTrue(problems)
+        self.assertTrue(
+            any("missing required property 'packDigest'" in problem for problem in problems),
+            problems,
+        )
+
+    def test_a_missing_archive_sha256_is_rejected_descriptively(self) -> None:
+        document = self.copy()
+        del document["archive"]["sha256"]
+        problems = schema_problems(document)
+        self.assertTrue(problems)
+        self.assertTrue(
+            any("missing required property 'sha256'" in problem for problem in problems),
+            problems,
+        )
+
+    def test_an_empty_pack_digest_is_rejected(self) -> None:
+        document = self.copy()
+        document["packDigest"] = ""
+        problems = schema_problems(document)
+        self.assertTrue(problems)
+        self.assertTrue(any("packDigest" in problem for problem in problems), problems)
+
+    def test_a_malformed_archive_sha256_is_rejected(self) -> None:
+        document = self.copy()
+        document["archive"]["sha256"] = "not-a-digest"
+        problems = schema_problems(document)
+        self.assertTrue(problems)
+        self.assertTrue(
+            any("archive.sha256" in problem for problem in problems), problems
+        )
+
+
 class HostileRegistryArchiveTests(unittest.TestCase):
     """Archives whose registry.json is present but unusable (F-061 gaps)."""
 
