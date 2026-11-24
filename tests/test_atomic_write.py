@@ -400,7 +400,7 @@ class BaselineHashTest(unittest.TestCase):
     checksum against a half-written archive would be defeated.
 
     The values were recorded by building the same four artifacts from
-    ``upstream/main`` at ec10f95, before this branch changed any tool, and
+    upstream/main at ec10f95, before this branch changed any tool, and
     re-recorded on 2026-11-20 when the Protocol 28 ScVal schema, null-map,
     scalar-endpoint and wide-integer fixtures (issues #503-#506) changed the
     pack's content, and again on 2026-11-20 when the one-byte padding,
@@ -417,29 +417,30 @@ class BaselineHashTest(unittest.TestCase):
     liveUntilLedgerSeq endpoint fixtures (issue #531), and for the
     MANAGE_DATA operation fixture (issue #544), and for the
     Transaction operation vector limit fixtures (issue #532), and for the
-    BUMP_SEQUENCE signed boundary fixture (issue #545): a content change
-    legitimately moves all four hashes,
+    BUMP_SEQUENCE signed boundary fixture (issue #545), and for the
+    TransactionEnvelope upload, memo, time-bound and issued-asset fixtures
+    (issues #510-#513): a content change legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
     Recompute them with:
         python3 tools/pack/pack.py protocol-28 --version 1.0.0 --output-dir D
-        python3 tools/release/manifest.py D/protocolcanary-fixtures-1.0.0.tar.gz \\
-            --revision 0123456789abcdef0123456789abcdef01234567 --engine 0.2.0 \\
-            --output D/protocolcanary-fixtures-1.0.0.manifest.json \\
+        python3 tools/release/manifest.py D/protocolcanary-fixtures-1.0.0.tar.gz \
+            --revision 0123456789abcdef0123456789abcdef01234567 --engine 0.2.0 \
+            --output D/protocolcanary-fixtures-1.0.0.manifest.json \
             --sha256-file D/protocolcanary-fixtures-1.0.0.tar.gz.sha256
         python3 tools/registry/generate.py protocol-28 --output D/registry-v1.json
     """
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "c97df093a9e36eb50abf95447d7d7b26189f0802b4394ad757434099896dc65c",
+            "54b22eb92db5e72dc9799e3786b7eace15118cbd827527a5dc79a6144b26ea7f",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "1eb84aca4ae4c013016d253660542beffcc6fa7ef3555de14dce53f5a4cad4a0",
+            "e5328380bfa2332bd3bdf0031231c1ee3000550c4e81793e6fd2f7f58a4f5c88",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "588873acc32360b2a2217b2368bcd2779a30ad437ccadb5234517c683be6664a",
+            "b8e4c60838c0b5d2123c384583281c2e5527a987c7456f0a0afea702cd4b745a",
         "registry-v1.json":
-            "10e3c07639240254469ed91f5aa178ce89d449d2557455ba99748551925342c8",
+            "d2d2d1bdf4531bfb422f507d44bfca0bb58184b80797570647dce87a92af8b79",
     }
 
     def setUp(self) -> None:
