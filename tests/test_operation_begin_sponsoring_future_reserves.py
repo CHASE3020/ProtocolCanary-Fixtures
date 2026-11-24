@@ -9,6 +9,8 @@ Asserts:
 from __future__ import annotations
 
 import base64
+import hashlib
+import json
 import sys
 import tomllib
 import unittest
@@ -83,8 +85,6 @@ class OperationBeginSponsoringFutureReservesTests(unittest.TestCase):
         self.assertEqual(generic_reencoded, raw)
 
     def test_evidence_record_references_fixture(self) -> None:
-        import hashlib, json
-
         data, raw = load(FIXTURE)
         record = json.loads(RECORD.read_text(encoding="utf-8"))
         self.assertEqual(record["fixtureId"], FIXTURE_ID)
