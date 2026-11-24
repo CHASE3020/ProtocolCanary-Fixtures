@@ -93,6 +93,10 @@ class DocumentedScriptTests(unittest.TestCase):
                 first_line = (REPO_ROOT / script).read_text(encoding="utf-8").splitlines()[0]
                 self.assertEqual(first_line, EXPECTED_SHEBANG)
 
+    @unittest.skipIf(
+        os.name != "posix",
+        "Windows does not expose meaningful POSIX write bits through stat()",
+    )
     def test_referenced_scripts_are_not_world_writable(self) -> None:
         for script in self.scripts:
             with self.subTest(script=script):
