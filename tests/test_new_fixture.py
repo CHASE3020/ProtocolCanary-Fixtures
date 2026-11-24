@@ -200,7 +200,11 @@ class OverwriteGuardTests(unittest.TestCase):
     """Issue #596: an existing fixture file is never silently replaced."""
 
     def setUp(self) -> None:
-        self.temp_dir = Path(tempfile.mkdtemp())
+        # Resolved, because Windows returns a short (8.3) temporary path such
+        # as RUNNER~1 while the tool resolves the target before comparing it
+        # with the pack directory; an unresolved root would mismatch and trip
+        # the outside-pack guard before the guard under test.
+        self.temp_dir = Path(tempfile.mkdtemp()).resolve()
         self.addCleanup(shutil.rmtree, self.temp_dir, ignore_errors=True)
 
     def run_tool(self, surface: str, fixture_id: str, *extra: str) -> tuple[int, str, str]:
