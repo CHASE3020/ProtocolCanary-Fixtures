@@ -421,7 +421,9 @@ class BaselineHashTest(unittest.TestCase):
     TransactionEnvelope upload, memo, time-bound and issued-asset fixtures
     (issues #510-#513), and for the operation arms, footprint arms,
     StellarValue closeTime boundaries, and V1 integer boundaries fixtures
-    (issues #547, #548, #559, #560): a content change legitimately moves all four hashes,
+    (issues #547, #548, #559, #560), and for the CLAWBACK and
+    SET_TRUST_LINE_FLAGS operation fixtures (issues #551, #552): a content change
+    legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
@@ -436,13 +438,13 @@ class BaselineHashTest(unittest.TestCase):
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "1cec69989cc890143a4ba0c05b3cf3f0409ce0a4a50b37bff456383c4b954880",
+            "0df9665bada197fb5967572373152e2ef6ad29e71eea5fe03c26c3c0d4f03e47",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "47723eed14be640150b2c9b04481a6fc96918775be5de4b56d8fc291a89ae185",
+            "9fbf30939c209040529c0af37cdde31d0cad4b62b3451ca5f8c26d916b786ee3",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "2e249c202bfa952b8ef651071b5b45779b115b61cf6fcc1a22fe36ab92e20d74",
+            "333926ccd0a0bf25ceecc93e79c86310697e9eee0c4fa0d6a9e021230b40be04",
         "registry-v1.json":
-            "d6ff92adef0c925fb215a31bd2f4099ed181bd7e8fc5bed05aa1e86644e352c4",
+            "75f65affd1bc61172aacb4ae93b71c30bdf18be6b68758a5f8660428dfa1a70b",
     }
 
     def setUp(self) -> None:
