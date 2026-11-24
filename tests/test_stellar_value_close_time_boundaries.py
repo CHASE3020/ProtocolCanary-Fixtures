@@ -83,7 +83,7 @@ class StellarValueCloseTimeBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(record["fixtureId"], ZERO_ID)
         self.assertEqual(record["outcome"], "matched")
-        self.assertEqual(record["fixtureSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["fixtureSha256"], hashlib.sha256((FIXTURE_DIR / f"{ZERO_ID}.toml").read_bytes()).hexdigest())
 
     def test_close_time_u64_max_evidence_record(self) -> None:
         _, raw = load(MAX_ID)
@@ -92,7 +92,7 @@ class StellarValueCloseTimeBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(record["fixtureId"], MAX_ID)
         self.assertEqual(record["outcome"], "matched")
-        self.assertEqual(record["fixtureSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["fixtureSha256"], hashlib.sha256((FIXTURE_DIR / f"{MAX_ID}.toml").read_bytes()).hexdigest())
 
     def test_endpoints_differ_only_in_close_time_bytes(self) -> None:
         """The two fixtures are identical except for the 8 closeTime bytes."""

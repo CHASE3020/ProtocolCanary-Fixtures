@@ -89,7 +89,7 @@ class OperationBeginSponsoringFutureReservesTests(unittest.TestCase):
         record = json.loads(RECORD.read_text(encoding="utf-8"))
         self.assertEqual(record["fixtureId"], FIXTURE_ID)
         self.assertEqual(record["outcome"], "matched")
-        expected_sha = hashlib.sha256(raw).hexdigest()
+        expected_sha = hashlib.sha256(FIXTURE.read_bytes()).hexdigest()
         self.assertEqual(record["fixtureSha256"], expected_sha)
 
 

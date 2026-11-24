@@ -1,7 +1,7 @@
 {
   "verificationVersion": 1,
   "fixtureId": "p28-xdr-operation-extend_footprint_ttl",
-  "fixtureSha256": "d14f52da208a80bd47841fbb4d6db0ac33c0a96ea3a22d485b260925132a7641",
+  "fixtureSha256": "a431da486ca3e17fb5bd45c78be7de09d8894a2b6fcf41dea8cd3ee7b858fb01",
   "method": "structural",
   "checkedAt": "2026-11-23T00:00:00Z",
   "verifier": {

@@ -1,7 +1,7 @@
 {
   "verificationVersion": 1,
   "fixtureId": "p28-xdr-operation-restore_footprint",
-  "fixtureSha256": "b521a2202552b8ebde23dacfe7754f19e288f9177729822f9f69df67a57364ed",
+  "fixtureSha256": "6d9bfffaf41ae8c80bb4c43da3386908a4b201809cb82746483ec58a30fd1273",
   "method": "structural",
   "checkedAt": "2026-11-23T00:00:00Z",
   "verifier": {

@@ -120,7 +120,7 @@ class TransactionV1IntegerBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(record["fixtureId"], V1_MIN_ID)
         self.assertEqual(record["outcome"], "matched")
-        self.assertEqual(record["fixtureSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["fixtureSha256"], hashlib.sha256((TX_ENV_DIR / f"{V1_MIN_ID}.toml").read_bytes()).hexdigest())
 
     def test_v1_maximum_evidence_record(self) -> None:
         _, raw = load(V1_MAX_ID)
@@ -129,7 +129,7 @@ class TransactionV1IntegerBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(record["fixtureId"], V1_MAX_ID)
         self.assertEqual(record["outcome"], "matched")
-        self.assertEqual(record["fixtureSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["fixtureSha256"], hashlib.sha256((TX_ENV_DIR / f"{V1_MAX_ID}.toml").read_bytes()).hexdigest())
 
     def test_fee_bump_evidence_record(self) -> None:
         _, raw = load(FEE_BUMP_ID)
@@ -138,7 +138,7 @@ class TransactionV1IntegerBoundaryTests(unittest.TestCase):
         )
         self.assertEqual(record["fixtureId"], FEE_BUMP_ID)
         self.assertEqual(record["outcome"], "matched")
-        self.assertEqual(record["fixtureSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["fixtureSha256"], hashlib.sha256((TX_ENV_DIR / f"{FEE_BUMP_ID}.toml").read_bytes()).hexdigest())
 
 
 if __name__ == "__main__":

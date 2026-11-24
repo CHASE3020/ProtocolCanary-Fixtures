@@ -92,7 +92,7 @@ class OperationExtendFootprintTTLTests(unittest.TestCase):
         )
         self.assertEqual(record["fixtureId"], EXTEND_ID)
         self.assertEqual(record["outcome"], "matched")
-        self.assertEqual(record["fixtureSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["fixtureSha256"], hashlib.sha256((CAMPAIGN_DIR / f"{EXTEND_ID}.toml").read_bytes()).hexdigest())
 
 
 class OperationRestoreFootprintTests(unittest.TestCase):
@@ -147,7 +147,7 @@ class OperationRestoreFootprintTests(unittest.TestCase):
         )
         self.assertEqual(record["fixtureId"], RESTORE_ID)
         self.assertEqual(record["outcome"], "matched")
-        self.assertEqual(record["fixtureSha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(record["fixtureSha256"], hashlib.sha256((CAMPAIGN_DIR / f"{RESTORE_ID}.toml").read_bytes()).hexdigest())
 
     def test_restore_is_shorter_than_extend(self) -> None:
         _, raw_extend = load(EXTEND_ID)

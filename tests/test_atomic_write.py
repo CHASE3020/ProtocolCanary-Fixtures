@@ -400,7 +400,7 @@ class BaselineHashTest(unittest.TestCase):
     checksum against a half-written archive would be defeated.
 
     The values were recorded by building the same four artifacts from
-    ``upstream/main`` at ec10f95, before this branch changed any tool, and
+    upstream/main at ec10f95, before this branch changed any tool, and
     re-recorded on 2026-11-20 when the Protocol 28 ScVal schema, null-map,
     scalar-endpoint and wide-integer fixtures (issues #503-#506) changed the
     pack's content, and again on 2026-11-20 when the one-byte padding,
@@ -417,29 +417,32 @@ class BaselineHashTest(unittest.TestCase):
     liveUntilLedgerSeq endpoint fixtures (issue #531), and for the
     MANAGE_DATA operation fixture (issue #544), and for the
     Transaction operation vector limit fixtures (issue #532), and for the
-    BUMP_SEQUENCE signed boundary fixture (issue #545): a content change
-    legitimately moves all four hashes,
+    BUMP_SEQUENCE signed boundary fixture (issue #545), and for the
+    TransactionEnvelope upload, memo, time-bound and issued-asset fixtures
+    (issues #510-#513), and for the operation arms, footprint arms,
+    StellarValue closeTime boundaries, and V1 integer boundaries fixtures
+    (issues #547, #548, #559, #560): a content change legitimately moves all four hashes,
     while the property being pinned stays the same -- the atomic write
     reproduces whatever bytes the tools produce.
 
     Recompute them with:
         python3 tools/pack/pack.py protocol-28 --version 1.0.0 --output-dir D
-        python3 tools/release/manifest.py D/protocolcanary-fixtures-1.0.0.tar.gz \\
-            --revision 0123456789abcdef0123456789abcdef01234567 --engine 0.2.0 \\
-            --output D/protocolcanary-fixtures-1.0.0.manifest.json \\
+        python3 tools/release/manifest.py D/protocolcanary-fixtures-1.0.0.tar.gz \
+            --revision 0123456789abcdef0123456789abcdef01234567 --engine 0.2.0 \
+            --output D/protocolcanary-fixtures-1.0.0.manifest.json \
             --sha256-file D/protocolcanary-fixtures-1.0.0.tar.gz.sha256
         python3 tools/registry/generate.py protocol-28 --output D/registry-v1.json
     """
 
     BASELINE = {
         "protocolcanary-fixtures-1.0.0.tar.gz":
-            "c97df093a9e36eb50abf95447d7d7b26189f0802b4394ad757434099896dc65c",
+            "1cec69989cc890143a4ba0c05b3cf3f0409ce0a4a50b37bff456383c4b954880",
         "protocolcanary-fixtures-1.0.0.manifest.json":
-            "1eb84aca4ae4c013016d253660542beffcc6fa7ef3555de14dce53f5a4cad4a0",
+            "47723eed14be640150b2c9b04481a6fc96918775be5de4b56d8fc291a89ae185",
         "protocolcanary-fixtures-1.0.0.tar.gz.sha256":
-            "588873acc32360b2a2217b2368bcd2779a30ad437ccadb5234517c683be6664a",
+            "2e249c202bfa952b8ef651071b5b45779b115b61cf6fcc1a22fe36ab92e20d74",
         "registry-v1.json":
-            "10e3c07639240254469ed91f5aa178ce89d449d2557455ba99748551925342c8",
+            "d6ff92adef0c925fb215a31bd2f4099ed181bd7e8fc5bed05aa1e86644e352c4",
     }
 
     def setUp(self) -> None:

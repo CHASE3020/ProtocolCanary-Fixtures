@@ -1,7 +1,7 @@
 {
   "verificationVersion": 1,
   "fixtureId": "p28-xdr-operation-begin_sponsoring_future_reserves",
-  "fixtureSha256": "a9dfe6f44e08f21a99e966b4f3992219249d689a58adc849be3d1f41ec81c70f",
+  "fixtureSha256": "4e91d15df30bd5ea407c8d2c41214cd27cecb1ae9d5bf0af3eaef83b3004589a",
   "method": "structural",
   "checkedAt": "2026-11-23T00:00:00Z",
   "verifier": {
