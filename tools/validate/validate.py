@@ -364,6 +364,11 @@ RPC_ASSERT_FIELDS = (
 class Fixture:
     path: Path
     data: dict
+    # The pack root the fixture was loaded from (``None`` for a fixture
+    # constructed directly, e.g. in a unit test). Payload references are
+    # confined to it, so a fixture cannot point at a file outside the pack
+    # it belongs to (F-056, issue #583).
+    root: Path | None = None
 
 
 @dataclass
@@ -958,7 +963,7 @@ def load_fixture(path: Path, report: Report, root: Path | None = None) -> Fixtur
         # nothing to gain by validating a document it never sees (issue #341,
         # row 4).
         return None
-    return Fixture(path=path, data=data)
+    return Fixture(path=path, data=data, root=root)
 
 
 def known_fixture_id(fx: Fixture) -> str | None:
@@ -1114,14 +1119,56 @@ def validate_common_fields(fx: Fixture, report: Report) -> None:
                     line=_field_line(path, file_field),
                 )
                 continue
-            referenced = (path.parent / data[file_field]).resolve()
-            if not referenced.is_file():
+            referenced, problem = resolve_payload_reference(fx, file_field)
+            if problem is not None:
+                report.error(path, problem, line=_field_line(path, file_field))
+            elif referenced is not None and not referenced.is_file():
                 report.error(
                     path,
                     f"{file_field} {data[file_field]!r} does not resolve to an existing file "
                     f"(resolved: {referenced})",
                     line=_field_line(path, file_field),
                 )
+
+
+def resolve_payload_reference(fx: Fixture, file_field: str) -> tuple[Path | None, str | None]:
+    """Resolve an ``input_file``/``expected_file`` reference inside the pack root.
+
+    Returns ``(resolved_path, None)`` for a reference that stays inside the
+    selected fixture-pack root, and ``(None, problem)`` for one that does not.
+    A non-string or empty value returns ``(None, None)``: the type check in
+    ``validate_common_fields`` reports that case, and it is not a path.
+
+    A reference must be relative to the fixture file and, once resolved (so
+    symlinks are followed), must remain under the pack root. Absolute paths
+    and ``..`` traversal that escapes the pack are therefore rejected, and so
+    is a symlink whose target lies outside the pack, which is what issue #583
+    requires. No URL decoding is applied: the value is a filesystem path, not
+    a URL. When the fixture was constructed without a pack root (only direct
+    unit-test callers do that) the fixture's own directory is the boundary,
+    which is the narrowest sensible interpretation of "inside the pack".
+    """
+    value = fx.data.get(file_field)
+    if not isinstance(value, str) or not value:
+        return None, None
+    if Path(value).is_absolute():
+        return None, (
+            f"field {file_field!r} must be a path relative to the fixture file; "
+            f"absolute paths are not allowed (got {value!r})"
+        )
+    root = (fx.root if fx.root is not None else fx.path.parent).resolve()
+    try:
+        referenced = (fx.path.parent / value).resolve()
+    except (OSError, ValueError) as error:
+        return None, f"{file_field} {value!r} could not be resolved: {error}"
+    try:
+        referenced.relative_to(root)
+    except ValueError:
+        return None, (
+            f"field {file_field!r} {value!r} resolves outside the fixture-pack "
+            f"root {root} (resolved: {referenced})"
+        )
+    return referenced, None
 
 
 def validate_top_level_keys(fx: Fixture, report: Report) -> None:
@@ -1347,6 +1394,9 @@ def validate_rpc_request(method: str, data: dict, path: Path, report: Report) ->
                 line=_field_line(path, "request"),
             )
 
+    # Ledger values that passed both the type and range checks above; the
+    # ordering rule below only applies to values that are otherwise valid.
+    ledger_values: dict[str, int] = {}
     for ledger_key in ("startLedger", "endLedger"):
         if ledger_key in request:
             val = request[ledger_key]
@@ -1362,6 +1412,22 @@ def validate_rpc_request(method: str, data: dict, path: Path, report: Report) ->
                     f"[request] {ledger_key}: {val} is not a ledger sequence (0..={_RPC_MAX_LEDGER})",
                     line=_field_line(path, "request"),
                 )
+            else:
+                ledger_values[ledger_key] = val
+
+    # getEvents takes an inclusive [startLedger, endLedger] window per the
+    # Stellar RPC specification, so an inverted range is not a valid request
+    # (issue #582). endLedger == startLedger is the valid single-ledger case.
+    if "startLedger" in ledger_values and "endLedger" in ledger_values:
+        start = ledger_values["startLedger"]
+        end = ledger_values["endLedger"]
+        if end < start:
+            report.error(
+                path,
+                f"[request] endLedger {end} is before startLedger {start}; "
+                "the ledger range must satisfy endLedger >= startLedger",
+                line=_field_line(path, "request"),
+            )
 
     if "pagination" in request:
         pag = request["pagination"]
@@ -2270,33 +2336,36 @@ def validate_directory(root: Path, seen_ids: dict[str, Path] | None = None) -> R
         if fx is not None:
             fixtures.append(fx)
 
-    # Check payload files referenced by input_file or expected_file
+    # Check payload files referenced by input_file or expected_file. Only a
+    # reference confined to the pack root is a pack member; an escaping or
+    # absolute reference is reported by validate_common_fields and never
+    # treated as part of this pack (issue #583).
     for fx in fixtures:
         for file_field in ("input_file", "expected_file"):
             if file_field in fx.data:
-                val = fx.data[file_field]
-                if isinstance(val, str) and val:
-                    referenced = (fx.path.parent / val).resolve()
-                    if referenced.is_file():
-                        pack_members.add(referenced)
-                        try:
-                            rel_payload = referenced.relative_to(root.resolve()).as_posix()
-                        except ValueError:
-                            rel_payload = referenced.name
-                        if len(rel_payload.split("/")) > pack_limits.MAX_DEPTH:
+                referenced, problem = resolve_payload_reference(fx, file_field)
+                if problem is not None or referenced is None:
+                    continue
+                if referenced.is_file():
+                    pack_members.add(referenced)
+                    try:
+                        rel_payload = referenced.relative_to(root.resolve()).as_posix()
+                    except ValueError:
+                        rel_payload = referenced.name
+                    if len(rel_payload.split("/")) > pack_limits.MAX_DEPTH:
+                        report.error(
+                            referenced,
+                            f"{rel_payload} is deeper than {pack_limits.MAX_DEPTH} path segments",
+                        )
+                    try:
+                        st = referenced.stat()
+                        if st.st_size > pack_limits.MAX_FILE_BYTES:
                             report.error(
                                 referenced,
-                                f"{rel_payload} is deeper than {pack_limits.MAX_DEPTH} path segments",
+                                f"{rel_payload} is {st.st_size} bytes, over the {pack_limits.MAX_FILE_BYTES} byte limit for one pack file",
                             )
-                        try:
-                            st = referenced.stat()
-                            if st.st_size > pack_limits.MAX_FILE_BYTES:
-                                report.error(
-                                    referenced,
-                                    f"{rel_payload} is {st.st_size} bytes, over the {pack_limits.MAX_FILE_BYTES} byte limit for one pack file",
-                                )
-                        except OSError as exc:
-                            report.error(referenced, f"failed to read file: {exc}")
+                    except OSError as exc:
+                        report.error(referenced, f"failed to read file: {exc}")
 
     # Enforce count and total size limits per root
     if len(pack_members) > pack_limits.MAX_FILES:
