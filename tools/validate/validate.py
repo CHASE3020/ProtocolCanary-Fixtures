@@ -703,6 +703,13 @@ def check_source_reference(value: str) -> str | None:
 
 
 def find_fixture_files(root: Path) -> list[Path]:
+    """Return every regular ``*.toml`` fixture file under ``root``.
+
+    The search is recursive, skips paths under a ``.git`` directory, and
+    returns absolute paths sorted for deterministic iteration. No file is
+    read, parsed or reported here: callers load each path with
+    :func:`load_fixture`, which records all problems on a :class:`Report`.
+    """
     fixtures = []
     for p in root.rglob("*.toml"):
         if not p.is_file():
@@ -846,6 +853,17 @@ def report_out_of_range_integers(path: Path, data: dict, report: Report) -> bool
 
 
 def load_fixture(path: Path, report: Report, root: Path | None = None) -> Fixture | None:
+    """Read and parse one TOML fixture, recording problems on ``report``.
+
+    ``root``, when given, is the pack directory used to shorten the path in
+    diagnostics; otherwise the nearest ``protocol-*`` ancestor is used, falling
+    back to the file name. Returns a :class:`Fixture` on success and ``None``
+    when the file cannot be read or parsed. Errors are appended to ``report``,
+    never raised: an unreadable or oversized file, invalid UTF-8, forbidden
+    control or bidirectional characters, invalid TOML (with a line number when
+    the parser exposes one), and TOML integers outside the signed 64-bit range
+    the engine accepts all produce diagnostics and no fixture.
+    """
     try:
         st = path.stat()
         file_size = st.st_size
@@ -975,6 +993,17 @@ def _require(data: dict, key: str, expected_type: type, path: Path, report: Repo
 
 
 def validate_common_fields(fx: Fixture, report: Report) -> None:
+    """Validate the fields every fixture shares, recording errors on ``report``.
+
+    Checks required fields and their types, a non-empty lowercase ``id``, a
+    positive integer ``protocol``, a known ``surface``, a non-empty and
+    non-vague ``category``, a non-empty ``description``, a required
+    authoritative ``source_reference`` (including that any commit or release
+    link is pinned), known and unique ``required_capabilities``, and that any
+    ``input_file``/``expected_file`` resolves to an existing file. Returns
+    ``None``; every problem is appended to ``report`` with the fixture's path
+    and id, and a line number when the field's definition can be located.
+    """
     data, path = fx.data, fx.path
 
     ok_id = _require(data, "id", str, path, report)
@@ -1142,6 +1171,14 @@ def _validate_base64(value: str, field_name: str, path: Path, report: Report) ->
 
 
 def validate_xdr_body(fx: Fixture, report: Report) -> None:
+    """Validate an ``xdr`` fixture body and append problems to ``report``.
+
+    Requires ``type`` to name an XDR type ``canary-xdr`` supports and ``kind``
+    to be one of ``XDR_KINDS``. ``value_base64`` is required, non-empty and
+    canonical base64; ``expected_base64`` is required and validated only for
+    ``encode-equals`` and is rejected for every other kind, matching the
+    engine's loader. Returns ``None``.
+    """
     data, path = fx.data, fx.path
 
     ok_type = _require(data, "type", str, path, report)
@@ -1469,6 +1506,14 @@ def validate_rpc_request(method: str, data: dict, path: Path, report: Report) ->
 
 
 def validate_rpc_body(fx: Fixture, report: Report) -> None:
+    """Validate an ``rpc`` fixture body and append problems to ``report``.
+
+    Requires ``method`` to be one of ``RPC_METHODS`` and validates the optional
+    ``[request]`` table for that method. Requires a non-empty ``[[assert]]``
+    array; each assertion must carry a known ``kind``, only the keys that kind
+    accepts, a non-empty string ``field``, and the kind's required value, type,
+    range or one-of list. Returns ``None``.
+    """
     data, path = fx.data, fx.path
 
     ok_method = _require(data, "method", str, path, report)
@@ -1992,6 +2037,14 @@ def decode_strkey(
 
 
 def validate_soroban_body(fx: Fixture, report: Report) -> None:
+    """Validate a ``soroban`` fixture body and append problems to ``report``.
+
+    Checks the required ``source_account`` (a G... strkey), ``contract_id`` (a
+    C... strkey), non-empty ``function`` of at most 32 UTF-8 bytes and an
+    integer ``sequence_number``; validates every optional ``[[args]]`` entry;
+    and requires an ``[expect]`` table with a known ``kind`` and, when present,
+    a non-empty string ``message_contains``. Returns ``None``.
+    """
     data, path = fx.data, fx.path
 
     if _require(data, "source_account", str, path, report):
@@ -2111,6 +2164,13 @@ def validate_soroban_body(fx: Fixture, report: Report) -> None:
 
 
 def validate_body(fx: Fixture, report: Report) -> None:
+    """Dispatch body validation on the fixture's ``surface``.
+
+    ``xdr``, ``rpc`` and ``soroban`` are handled by their dedicated validators;
+    an invalid or missing surface was already reported by
+    :func:`validate_common_fields`, so it adds no further diagnostic here.
+    Returns ``None`` and appends every problem to ``report``.
+    """
     surface = fx.data.get("surface")
     if surface == "xdr":
         validate_xdr_body(fx, report)
@@ -2126,6 +2186,16 @@ def validate_unique_ids(
     report: Report,
     seen: dict[str, Path] | None = None,
 ) -> dict[str, Path]:
+    """Report fixture ids already defined elsewhere and return the id map.
+
+    ``seen`` maps each accepted id to the path that first defined it; pass the
+    returned map back on a later call to enforce uniqueness across several
+    roots. A duplicate is reported on the later fixture's path with its ``id``
+    line when known and names the first defining path; the first definition is
+    left in the map. Non-string ids are skipped because
+    :func:`validate_common_fields` already reports their type. Returns the
+    updated id-to-path map.
+    """
     if seen is None:
         seen = {}
     for fx in fixtures:
@@ -2163,6 +2233,16 @@ def check_portable_paths(root: Path, report: Report) -> None:
 
 
 def validate_directory(root: Path, seen_ids: dict[str, Path] | None = None) -> Report:
+    """Validate one pack directory and return the aggregated ``Report``.
+
+    Walks the pack for ``*.toml`` fixtures, checks portable file names and the
+    pack's file-count, depth and total-size limits, loads every fixture,
+    accounts for referenced payload files, and runs the common-field, body and
+    top-level-key validators. Uniqueness is checked last, passing ``seen_ids``
+    through to :func:`validate_unique_ids` so ids are unique across roots.
+    Never raises for fixture problems and never mutates the files: every error
+    and warning is a :class:`Diagnostic` on the returned report.
+    """
     report = Report()
     fixtures: list[Fixture] = []
     check_portable_paths(root, report)
